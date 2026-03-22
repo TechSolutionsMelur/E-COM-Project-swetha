@@ -1,0 +1,17 @@
+{%extends "crud/base.html" %}
+{% block content %}
+<div class="container py-3">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table class="w-50 table-light " style= "border-radius:10px">
+            {% for field in upload_form %}
+            <tr>
+                <th>{{field.label}}</th>
+                <td>{{field}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" class="btn btn-lg btn-success md-5">upload</button>
+    </form>
+</div>
+{% endblock %}
