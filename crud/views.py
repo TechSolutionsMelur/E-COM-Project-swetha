@@ -9,16 +9,15 @@ def test(request):
     queryset = Food_Product.objects.all()
     return render(request, 'crud/home.html', {'queryset': queryset})
 def upload(request):
-    upload = Food_form()
     if request.method == 'POST':
         upload = Food_form(request.POST, request.FILES)
         if upload.is_valid():
             upload.save()
             return redirect('test')
-        else:
-            return HttpResponse("""something went wrong. pleade reload the webpage by clicking <a href="{{url:'test'}}>Reload</a>" """)
     else:
-        return render(request, 'crud/upload_form.html',{'upload_form':upload})
+        upload = Food_form()
+
+    return render(request, 'crud/upload_form.html',{'form':upload})
 
 def update_Food(request,food_id):
     data = None
@@ -35,7 +34,7 @@ def update_Food(request,food_id):
             return redirect('test')
         else:
             return HttpResponse("""something went wrong. pleade reload the webpage by clicking <a href="{{url:'test'}}>Reload</a>" """)
-    return render(request, 'crud/upload_form.html', {'upload_form':Food_form(instance=data)})
+    return render(request, 'crud/upload_form.html', {'form':Food_form(instance=data)})
 
 def delete_food(request, food_id):
     food_id = int(food_id)
