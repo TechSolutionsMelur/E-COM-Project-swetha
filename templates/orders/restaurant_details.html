@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ restaurant.restaurant_name }} — FoodRush{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding-top: 70px;">
+
+<!-- ── Restaurant Hero Banner ── -->
+<div class="rest-hero">
+    {% if restaurant.cover_image %}
+    <img src="{{ restaurant.cover_image.url }}"
+         alt="{{ restaurant.restaurant_name }}"
+         class="rest-hero-img">
+    {% endif %}
+    <div class="rest-hero-overlay"></div>
+    <div class="container rest-hero-content">
+        <div class="rest-info-card">
+
+            <div class="rest-info-left">
+                <div class="rest-logo">
+                    {% if restaurant.cover_image %}
+                    <img src="{{ restaurant.cover_image.url }}"
+                         alt="{{ restaurant.restaurant_name }}">
+                    {% else %}
+                    <i class="bi bi-shop"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h1 class="rest-title">
+                            {{ restaurant.restaurant_name }}
+                        </h1>
+                        <i class="bi bi-patch-check-fill text-accent"
+                           title="Verified"></i>
+                    </div>
+                    <p class="rest-cuisine">
+                        {{ restaurant.get_cuisine_type_display }}
+                        · {{ restaurant.city }}, {{ restaurant.state }}
+                    </p>
+                    {% if restaurant.description %}
+                    <p class="rest-desc">{{ restaurant.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="rest-info-right">
+                <div class="rest-stat">
+                    <i class="bi bi-clock text-accent"></i>
+                    <div>
+                        <span class="stat-val">
+                            {{ restaurant.avg_delivery_time }} min
+                        </span>
+                        <span class="stat-lbl">Delivery</span>
+                    </div>
+                </div>
+                <div class="rest-stat">
+                    <i class="bi bi-bag text-accent"></i>
+                    <div>
+                        <span class="stat-val">
+                            ₹{{ restaurant.min_order_amount|floatformat:0 }}
+                        </span>
+                        <span class="stat-lbl">Min Order</span>
+                    </div>
+                </div>
+                <div class="rest-stat">
+                    <i class="bi bi-circle-fill
+                        {% if restaurant.is_open %}text-success
+                        {% else %}text-danger{% endif %}"
+                       style="font-size:0.6rem;">
+                    </i>
+                    <div>
+                        <span class="stat-val">
+                            {% if restaurant.is_open %}Open{% else %}Closed{% endif %}
+                        </span>
+                        <span class="stat-lbl">
+                            Until {{ restaurant.closing_time|time:"g:i A" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- ── Active Offers Banner ── -->
+        {% if active_offers %}
+        <div class="container" style="margin-top: 16px;">
+            <div class="offers-banner-row">
+                {% for offer in active_offers %}
+                <div class="offer-banner-chip">
+                    <i class="bi bi-tag-fill me-2"></i>
+                    <div>
+                        <span class="offer-banner-code">
+                            {{ offer.code }}
+                        </span>
+                        <span class="offer-banner-desc">
+                            {% if offer.discount_type == 'percent' %}
+                                {{ offer.discount_value }}% off
+                            {% elif offer.discount_type == 'flat' %}
+                                ₹{{ offer.discount_value }} off
+                            {% elif offer.discount_type == 'delivery' %}
+                                Free delivery
+                            {% endif %}
+                            {% if offer.min_order_value %}
+                                on orders above ₹{{ offer.min_order_value }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- ── Menu + Cart Layout ── -->
+<div class="container menu-layout">
+<div class="row g-4">
+
+    <!-- ── Left: Menu ── -->
+    <div class="col-lg-8">
+
+        <!-- Category quick-jump -->
+        {% if categories %}
+        <div class="menu-cat-jump mb-4">
+            {% for cat in categories %}
+            {% if cat.items.all %}
+            <a href="#cat-{{ cat.pk }}"
+               class="cat-jump-pill">
+                {{ cat.name }}
+            </a>
+            {% endif %}
+            {% endfor %}
+            {% if uncategorized %}
+            <a href="#cat-other" class="cat-jump-pill">Other</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if not restaurant.is_open %}
+        <div class="alert glass-alert mb-4"
+             style="border-color:rgba(220,53,69,0.3);
+                    background:rgba(220,53,69,0.05);">
+            <i class="bi bi-clock me-2"></i>
+            This restaurant is currently closed.
+            Orders placed now will be prepared when they reopen at
+            {{ restaurant.opening_time|time:"g:i A" }}.
+        </div>
+        {% endif %}
+
+        <!-- Categories -->
+        {% for cat in categories %}
+        {% if cat.items.all %}
+        <div class="menu-section" id="cat-{{ cat.pk }}">
+            <h5 class="menu-section-title">{{ cat.name }}</h5>
+            <div class="menu-items-list">
+                {% for item in cat.items.all %}
+                {% if item.is_available %}
+                {% include 'orders/_menu_item_card.html' %}
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <!-- Uncategorized -->
+        {% if uncategorized %}
+        <div class="menu-section" id="cat-other">
+            <h5 class="menu-section-title">More Items</h5>
+            <div class="menu-items-list">
+                {% for item in uncategorized %}
+                {% include 'orders/_menu_item_card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Completely empty menu -->
+        {% if not categories and not uncategorized %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-journal-x"></i>
+            </div>
+            <h3>Menu not available</h3>
+            <p style="color:var(--text-muted);">
+                This restaurant hasn't added menu items yet.
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ── Right: Cart Sidebar ── -->
+    <div class="col-lg-4">
+        <div class="cart-sidebar" id="cartSidebar">
+            <div class="cart-sidebar-header">
+                <h5 class="fw-700 mb-0">
+                    <i class="bi bi-bag-fill text-accent me-2"></i>
+                    Your Order
+                </h5>
+                {% if cart and not cart.is_empty %}
+                <span style="color:var(--text-muted); font-size:0.82rem;">
+                    {{ cart.restaurant.restaurant_name }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="cart-sidebar-body" id="cartBody">
+                {% if cart and not cart.is_empty and cart.restaurant.pk == restaurant.pk %}
+                    {% include 'orders/_cart_sidebar.html' %}
+                {% else %}
+                    <div class="cart-empty-state" id="cartEmptyState">
+                        <i class="bi bi-bag"></i>
+                        <p>Your cart is empty</p>
+                        <small style="color:var(--text-muted);">
+                            Add items from the menu to get started
+                        </small>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+
+<!-- ── Restaurant conflict modal ── -->
+<div class="glass-modal-overlay" id="conflictOverlay"
+     style="display:none;">
+    <div class="glass-modal">
+        <div class="glass-modal-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h5 class="fw-700">Start New Cart?</h5>
+        <p id="conflictMsg" style="color:var(--text-muted);
+                                   font-size:0.9rem;">
+        </p>
+        <div class="d-flex gap-3 justify-content-center mt-4">
+            <button class="btn btn-glass px-4"
+                    onclick="closeConflict()">
+                Keep Current
+            </button>
+            <button class="btn btn-accent px-4"
+                    id="confirmClearBtn">
+                Yes, Start Fresh
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{% static 'js/customer.js' %}"></script>
+<script>
+    const RESTAURANT_PK = {{ restaurant.pk }};
+</script>
+{% endblock %}

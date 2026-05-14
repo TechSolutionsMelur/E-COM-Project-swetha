@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block title %}Step 3 — Legal & Compliance{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    {% include 'restaurants/onboarding/_progress.html' with step=3 %}
+
+    <div class="row justify-content-center">
+    <div class="col-lg-8">
+    <div class="glass-card p-5">
+
+        <h3 class="fw-700 mb-1">Legal & Compliance</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem;" class="mb-4">
+            These details are required by law and kept strictly confidential.
+            All information is verified by our compliance team.
+        </p>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            <!-- ── Legal Identifiers ── -->
+            <div class="onboard-section-title mb-3">
+                <i class="bi bi-shield-check text-accent me-2"></i>
+                License & Registration Numbers
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="glass-label">
+                        FSSAI License Number *
+                        <span class="info-tip" data-bs-toggle="tooltip"
+                              title="14-digit number on your FSSAI certificate">
+                            <i class="bi bi-question-circle"></i>
+                        </span>
+                    </label>
+                    <input type="text" name="fssai_license_number"
+                           value="{{ form.fssai_license_number.value|default:'' }}"
+                           class="form-control glass-input {% if form.fssai_license_number.errors %}is-invalid{% endif %}"
+                           placeholder="14-digit FSSAI number"
+                           maxlength="14">
+                    {% for e in form.fssai_license_number.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                    <small style="color:var(--text-muted);">
+                        Required for all food businesses in India
+                    </small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">Business License Number</label>
+                    <input type="text" name="business_license_number"
+                           value="{{ form.business_license_number.value|default:'' }}"
+                           class="form-control glass-input"
+                           placeholder="Optional">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">
+                        GST Number
+                        <span class="badge-optional">Optional</span>
+                    </label>
+                    <input type="text" name="gst_number"
+                           value="{{ form.gst_number.value|default:'' }}"
+                           class="form-control glass-input {% if form.gst_number.errors %}is-invalid{% endif %}"
+                           placeholder="15-character GST number"
+                           maxlength="15"
+                           style="text-transform:uppercase;">
+                    {% for e in form.gst_number.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">
+                        PAN Number
+                        <span class="badge-optional">Optional</span>
+                    </label>
+                    <input type="text" name="pan_number"
+                           value="{{ form.pan_number.value|default:'' }}"
+                           class="form-control glass-input {% if form.pan_number.errors %}is-invalid{% endif %}"
+                           placeholder="10-character PAN"
+                           maxlength="10"
+                           style="text-transform:uppercase;">
+                    {% for e in form.pan_number.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ── Operational Details ── -->
+            <div class="onboard-section-title mb-3">
+                <i class="bi bi-clock text-accent me-2"></i>
+                Operational Details
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="glass-label">Opening Time *</label>
+                    <input type="time" name="opening_time"
+                           value="{{ form.opening_time.value|default:'09:00' }}"
+                           class="form-control glass-input {% if form.opening_time.errors %}is-invalid{% endif %}">
+                    {% for e in form.opening_time.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">Closing Time *</label>
+                    <input type="time" name="closing_time"
+                           value="{{ form.closing_time.value|default:'22:00' }}"
+                           class="form-control glass-input {% if form.closing_time.errors %}is-invalid{% endif %}">
+                    {% for e in form.closing_time.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">Average Delivery Time (minutes) *</label>
+                    <input type="number" name="avg_delivery_time"
+                           value="{{ form.avg_delivery_time.value|default:'30' }}"
+                           class="form-control glass-input {% if form.avg_delivery_time.errors %}is-invalid{% endif %}"
+                           min="10" max="120" placeholder="e.g. 30">
+                    {% for e in form.avg_delivery_time.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">Minimum Order Amount (₹) *</label>
+                    <div class="input-group">
+                        <span class="glass-input-prefix">₹</span>
+                        <input type="number" name="min_order_amount"
+                               value="{{ form.min_order_amount.value|default:'0' }}"
+                               class="form-control glass-input {% if form.min_order_amount.errors %}is-invalid{% endif %}"
+                               min="0" placeholder="0">
+                    </div>
+                    {% for e in form.min_order_amount.errors %}
+                        <div class="text-danger small mt-1">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Non-field errors -->
+                {% if form.non_field_errors %}
+                <div class="col-12">
+                    <div class="alert glass-alert"
+                         style="border-color:rgba(220,53,69,0.4);">
+                        {% for e in form.non_field_errors %}
+                            <small><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'onboarding_step2' %}" class="btn btn-glass px-4">
+                    <i class="bi bi-arrow-left me-2"></i> Back
+                </a>
+                <button type="submit" class="btn btn-accent px-5 py-2">
+                    Save & Continue <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+
+        </form>
+    </div>
+    </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-uppercase GST and PAN as user types
+    ['gst_number','pan_number'].forEach(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', () => {
+            el.value = el.value.toUpperCase();
+        });
+    });
+
+    // Bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        .forEach(el => new bootstrap.Tooltip(el));
+</script>
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ action }} Menu Item{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+        <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h6>
+                        <i class="bi bi-{% if action == 'Add' %}plus-circle
+                                   {% else %}pencil{% endif %}
+                                   text-accent me-2"></i>
+                        {{ action }} Menu Item
+                    </h6>
+                    <a href="{% url 'menu_list' %}"
+                       class="btn-dash-action">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+
+                <div class="dash-card-body">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+
+                        <div class="col-md-8">
+                            <label class="glass-label">Item Name *</label>
+                            <input type="text" name="name"
+                                   value="{{ form.name.value|default:'' }}"
+                                   class="form-control glass-input
+                                   {% if form.name.errors %}is-invalid{% endif %}"
+                                   placeholder="e.g. Masala Dosa">
+                            {% for e in form.name.errors %}
+                                <div class="invalid-feedback">{{ e }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="glass-label">Price (₹) *</label>
+                            <input type="number" name="price"
+                                   value="{{ form.price.value|default:'' }}"
+                                   class="form-control glass-input
+                                   {% if form.price.errors %}is-invalid{% endif %}"
+                                   placeholder="0.00"
+                                   step="0.01" min="1">
+                            {% for e in form.price.errors %}
+                                <div class="invalid-feedback">{{ e }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="glass-label">Description</label>
+                            <textarea name="description" rows="3"
+                                      class="form-control glass-input"
+                                      placeholder="Short description of the dish...">{{ form.description.value|default:'' }}</textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">Category</label>
+                            <select name="menu_category"
+                                    class="form-control glass-input glass-select">
+                                <option value="">— No Category —</option>
+                                {% for cat in form.fields.menu_category.queryset %}
+                                <option value="{{ cat.pk }}"
+                                    {% if form.menu_category.value|stringformat:"s" == cat.pk|stringformat:"s" %}
+                                    selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">Item Type *</label>
+                            <div class="item-type-group">
+                                {% for val, label in form.fields.item_type.choices %}
+                                <label class="item-type-option
+                                    {% if form.item_type.value == val %}active{% endif %}
+                                    type-{{ val }}">
+                                    <input type="radio" name="item_type"
+                                           value="{{ val }}"
+                                           {% if form.item_type.value == val %}
+                                           checked{% endif %}>
+                                    <span class="type-dot type-{{ val }}"></span>
+                                    {{ label }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Image upload -->
+                        <div class="col-12">
+                            <label class="glass-label">Item Image</label>
+                            {% if form.instance.image %}
+                            <div class="current-image-preview mb-2">
+                                <img src="{{ form.instance.image.url }}"
+                                     alt="Current image"
+                                     class="item-preview-img">
+                                <span style="color:var(--text-muted);
+                                             font-size:0.82rem;">
+                                    Current image
+                                </span>
+                            </div>
+                            {% endif %}
+                            <div class="file-drop-zone" id="item-drop-zone">
+                                <input type="file" name="image"
+                                       id="item-file-input"
+                                       class="file-hidden-input"
+                                       accept="image/*">
+                                <div class="file-drop-content"
+                                     id="item-drop-content">
+                                    <i class="bi bi-image"></i>
+                                    <p>Upload a photo of this dish
+                                        <span class="text-accent">
+                                            browse
+                                        </span>
+                                    </p>
+                                    <small style="color:var(--text-muted);">
+                                        JPG, PNG, WEBP — max 5MB
+                                    </small>
+                                </div>
+                                <div class="file-selected"
+                                     id="item-file-selected"
+                                     style="display:none;">
+                                    <i class="bi bi-image text-accent"></i>
+                                    <span id="item-file-name"></span>
+                                    <button type="button"
+                                            class="btn-clear-file"
+                                            onclick="clearItemFile()">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Toggles -->
+                        <div class="col-md-6">
+                            <div class="toggle-field">
+                                <div>
+                                    <span class="glass-label d-block">
+                                        Available
+                                    </span>
+                                    <small style="color:var(--text-muted);">
+                                        Customers can order this item
+                                    </small>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" name="is_available"
+                                           {% if form.is_available.value %}
+                                           checked{% endif %}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="toggle-field">
+                                <div>
+                                    <span class="glass-label d-block">
+                                        Featured
+                                    </span>
+                                    <small style="color:var(--text-muted);">
+                                        Highlight on your menu
+                                    </small>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" name="is_featured"
+                                           {% if form.is_featured.value %}
+                                           checked{% endif %}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'menu_list' %}"
+                           class="btn btn-glass px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-accent px-5">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ action }} Item
+                        </button>
+                    </div>
+
+                </form>
+                </div>
+            </div>
+
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+// Item type radio visual
+document.querySelectorAll('.item-type-option input').forEach(radio => {
+    radio.addEventListener('change', () => {
+        document.querySelectorAll('.item-type-option')
+            .forEach(o => o.classList.remove('active'));
+        radio.closest('.item-type-option').classList.add('active');
+    });
+});
+
+// File upload
+const dropZone   = document.getElementById('item-drop-zone');
+const fileInput  = document.getElementById('item-file-input');
+const dropCont   = document.getElementById('item-drop-content');
+const fileSel    = document.getElementById('item-file-selected');
+const fileNameEl = document.getElementById('item-file-name');
+
+dropZone.addEventListener('click', e => {
+    if (!e.target.closest('.btn-clear-file')) fileInput.click();
+});
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) showItemFile(fileInput.files[0]);
+});
+function showItemFile(file) {
+    fileNameEl.textContent   = file.name;
+    dropCont.style.display   = 'none';
+    fileSel.style.display    = 'flex';
+    dropZone.style.borderColor = 'rgba(255,107,53,0.6)';
+}
+function clearItemFile() {
+    fileInput.value          = '';
+    dropCont.style.display   = 'flex';
+    fileSel.style.display    = 'none';
+    dropZone.style.borderColor = '';
+}
+</script>
+{% endblock %}

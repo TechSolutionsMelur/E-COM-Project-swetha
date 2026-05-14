@@ -1,0 +1,42 @@
+<header class="dash-topbar">
+    <!-- Mobile menu toggle -->
+    <button class="sidebar-toggle-btn d-lg-none"
+            id="sidebarToggle">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <div class="topbar-left">
+        <h4 class="topbar-title">{% block dash_title %}Dashboard{% endblock %}</h4>
+        <span class="topbar-breadcrumb">
+            <i class="bi bi-shop me-1"></i>
+            {{ profile.restaurant_name }}
+        </span>
+    </div>
+
+    <div class="topbar-right">
+        <!-- Quick add button -->
+        <a href="{% url 'menu_item_add' %}" class="btn btn-accent btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i> Add Item
+        </a>
+
+        <!-- Notification bell (placeholder) -->
+        <a href="{% url 'restaurant_notifications' %}"
+        class="sidebar-link
+        {% if active_tab == 'notifications' %}active{% endif %}">
+            <i class="bi bi-bell"></i>
+            <span>Notifications</span>
+            {% if pending_count %}
+            <span class="sidebar-badge">{{ pending_count }}</span>
+            {% endif %}
+        </a>
+
+        <!-- Avatar -->
+        <div class="topbar-avatar">
+            {% if profile.cover_image %}
+                <img src="{{ profile.cover_image.url }}" alt="">
+            {% else %}
+                <i class="bi bi-person-circle"></i>
+            {% endif %}
+        </div>
+    </div>
+</header>

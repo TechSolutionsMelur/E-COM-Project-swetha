@@ -17,10 +17,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR2 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_URL = os.path.join(BASE_DIR2, 'templates')
-STATIC_FILES = os.path.join(BASE_DIR2, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR2,'media')
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
 
 
 
@@ -35,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'accounts.User'
+
 
 # Application definition
 
@@ -47,7 +46,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'crud',
+    'orders',
+    'accounts',
+    'restaurants',    
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
@@ -63,7 +64,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'E_com.urls'
-
+# 'orders.context_processors.cart_processor',
+'restaurants.context_processors.restaurant_context',
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -133,4 +135,16 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATICFILES_DIRS = [STATIC_FILES]
+# Static files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+#login 
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

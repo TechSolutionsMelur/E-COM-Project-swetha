@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Dashboard — FoodRush{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    <!-- Welcome + Search -->
+    <div class="cust-welcome-card mb-4">
+        <div class="welcome-left">
+            <div class="welcome-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+                <h4 class="fw-700 mb-1">
+                    Hey, {{ user.username }}! 👋
+                </h4>
+                <p style="color:var(--text-muted);
+                           font-size:0.88rem; margin:0;">
+                    What are you craving today?
+                </p>
+            </div>
+        </div>
+        <div class="welcome-right">
+            <!-- Inline search bar -->
+            <form method="GET"
+                  action="{% url 'customer_search' %}"
+                  class="cust-search-form">
+                <div class="cust-search-box">
+                    <i class="bi bi-search cust-search-icon"></i>
+                    <input type="text"
+                           name="q"
+                           class="cust-search-input"
+                           placeholder="Search dishes or restaurants..."
+                           autocomplete="off">
+                    <button type="submit" class="cust-search-btn">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="cust-stats-row mb-5">
+        <div class="cust-stat-card">
+            <div class="cust-stat-icon"
+                 style="background:rgba(255,107,53,0.12);
+                        color:var(--accent);">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="cust-stat-info">
+                <span class="cust-stat-value">
+                    {{ total_orders }}
+                </span>
+                <span class="cust-stat-label">Total Orders</span>
+            </div>
+        </div>
+        <div class="cust-stat-card">
+            <div class="cust-stat-icon"
+                 style="background:rgba(16,185,129,0.12);
+                        color:#10b981;">
+                <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="cust-stat-info">
+                <span class="cust-stat-value">
+                    {{ delivered_orders }}
+                </span>
+                <span class="cust-stat-label">Delivered</span>
+            </div>
+        </div>
+        <div class="cust-stat-card">
+            <div class="cust-stat-icon"
+                 style="background:rgba(59,130,246,0.12);
+                        color:#60a5fa;">
+                <i class="bi bi-shop"></i>
+            </div>
+            <div class="cust-stat-info">
+                <span class="cust-stat-value">
+                    {{ unique_restaurants }}
+                </span>
+                <span class="cust-stat-label">Restaurants</span>
+            </div>
+        </div>
+        <div class="cust-stat-card">
+            <div class="cust-stat-icon"
+                 style="background:rgba(245,158,11,0.12);
+                        color:#f59e0b;">
+                <i class="bi bi-currency-rupee"></i>
+            </div>
+            <div class="cust-stat-info">
+                <span class="cust-stat-value">
+                    ₹{{ total_spent|floatformat:0 }}
+                </span>
+                <span class="cust-stat-label">Total Spent</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Cart Banner -->
+    {% if cart and not cart.is_empty %}
+    <div class="glass-card p-4 mb-5"
+         style="border-color:rgba(255,107,53,0.35);
+                background:rgba(255,107,53,0.05);">
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap gap-3">
+            <div>
+                <h6 class="fw-700 mb-1">
+                    <i class="bi bi-bag-fill text-accent me-2"></i>
+                    Cart from
+                    <span class="text-accent">
+                        {{ cart.restaurant.restaurant_name }}
+                    </span>
+                </h6>
+                <p style="color:var(--text-muted);
+                           font-size:0.82rem; margin:0;">
+                    {{ cart.total_items }}
+                    item{{ cart.total_items|pluralize }}
+                    · Subtotal ₹{{ cart.subtotal }}
+                </p>
+            </div>
+            <a href="{% url 'cart_detail' %}"
+               class="btn btn-accent px-4">
+                View Cart & Checkout
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Featured Restaurants -->
+    <div class="cust-section-header">
+        <div>
+            <h4 class="cust-section-title">
+                Featured
+                <span class="text-accent">Restaurants</span>
+            </h4>
+            <p class="cust-section-sub">
+                Top picks open right now
+            </p>
+        </div>
+        <a href="{% url 'landing' %}"
+           class="btn btn-glass btn-sm px-4">
+            View All
+            <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    {% if featured_restaurants %}
+    <div class="restaurant-grid mb-5">
+        {% for restaurant in featured_restaurants %}
+        <div class="restaurant-card">
+            <div class="card-cover">
+                {% if restaurant.cover_image %}
+                <img src="{{ restaurant.cover_image.url }}"
+                     alt="{{ restaurant.restaurant_name }}"
+                     class="cover-img">
+                {% else %}
+                <div class="cover-placeholder">
+                    <i class="bi bi-shop"></i>
+                </div>
+                {% endif %}
+                <span class="cuisine-badge">
+                    {{ restaurant.get_cuisine_type_display }}
+                </span>
+                <span class="delivery-pill">
+                    <i class="bi bi-clock"></i>
+                    {{ restaurant.avg_delivery_time }} min
+                </span>
+                {% if restaurant.has_active_offer %}
+                <span class="offer-pill-card">
+                    <i class="bi bi-tag-fill"></i> Offer
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body-custom">
+                <div class="card-top-row">
+                    <h3 class="card-restaurant-name">
+                        {{ restaurant.restaurant_name }}
+                    </h3>
+                    <span class="verified-badge">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </span>
+                </div>
+                <p class="card-location">
+                    <i class="bi bi-geo-alt"></i>
+                    {{ restaurant.city }}, {{ restaurant.state }}
+                </p>
+                {% if restaurant.description %}
+                <p class="card-desc">
+                    {{ restaurant.description|truncatechars:65 }}
+                </p>
+                {% endif %}
+                <div class="card-footer-custom">
+                    <div class="card-meta">
+                        <span class="meta-pill">
+                            <i class="bi bi-bag"></i>
+                            Min ₹{{ restaurant.min_order_amount|floatformat:0 }}
+                        </span>
+                    </div>
+                    <a href="{% url 'restaurant_detail' restaurant.pk %}"
+                       class="btn-order-now">
+                        Order Now
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state mb-5">
+        <div class="empty-icon"><i class="bi bi-shop"></i></div>
+        <h3>No restaurants available</h3>
+        <p>Check back soon!</p>
+    </div>
+    {% endif %}
+
+    <!-- Recent Orders -->
+    {% if recent_orders %}
+    <div class="cust-section-header">
+        <div>
+            <h4 class="cust-section-title">
+                Recent <span class="text-accent">Orders</span>
+            </h4>
+            <p class="cust-section-sub">Your last 3 orders</p>
+        </div>
+        <a href="{% url 'order_history' %}"
+           class="btn btn-glass btn-sm px-4">
+            View All
+        </a>
+    </div>
+
+    <div class="orders-list">
+        {% for order in recent_orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div class="order-meta">
+                    <span class="order-number">
+                        #{{ order.order_number }}
+                    </span>
+                    <span class="order-date">
+                        {{ order.placed_at|date:"d M, g:i A" }}
+                    </span>
+                </div>
+                <span class="order-status-badge
+                             status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <div class="order-card-body">
+                <div class="order-restaurant">
+                    <i class="bi bi-shop text-accent me-2"></i>
+                    <span class="fw-600">
+                        {{ order.restaurant.restaurant_name }}
+                    </span>
+                </div>
+                <div class="order-items-preview">
+                    {% for oi in order.items.all|slice:":3" %}
+                    <span class="order-item-chip">
+                        {{ oi.item_name }} × {{ oi.quantity }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="order-card-footer">
+                <div class="order-total">
+                    <span style="color:var(--text-muted);
+                                  font-size:0.75rem;">Total</span>
+                    <span class="text-accent fw-700">
+                        ₹{{ order.total_amount }}
+                    </span>
+                </div>
+                <a href="{% url 'order_detail' order.order_number %}"
+                   class="btn btn-accent btn-sm px-4">
+                    View
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}

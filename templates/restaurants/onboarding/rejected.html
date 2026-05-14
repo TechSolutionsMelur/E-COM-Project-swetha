@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Application Rejected{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-md-7">
+<div class="glass-card p-5 text-center">
+
+    <div class="pending-icon mb-4" style="background:rgba(220,53,69,0.15);
+         border-color:rgba(220,53,69,0.4); color:#ff6b7a;">
+        <i class="bi bi-x-circle-fill"></i>
+    </div>
+
+    <h2 class="auth-heading">Application Not Approved</h2>
+    <p style="color:var(--text-muted);" class="mt-2">
+        Unfortunately your application for
+        <span class="text-accent fw-600">{{ profile.restaurant_name }}</span>
+        was not approved.
+    </p>
+
+    {% if profile.rejection_reason %}
+    <div class="glass-card p-4 text-start my-4"
+         style="border-color:rgba(220,53,69,0.3);">
+        <h6 style="color:#ff6b7a;" class="mb-2">
+            <i class="bi bi-info-circle me-2"></i>Reason:
+        </h6>
+        <p style="color:var(--text-muted); margin:0;">
+            {{ profile.rejection_reason }}
+        </p>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-3 justify-content-center flex-wrap mt-3">
+        <a href="{% url 'onboarding_step1' %}" class="btn btn-accent px-4">
+            <i class="bi bi-arrow-repeat me-2"></i> Resubmit Application
+        </a>
+        <a href="{% url 'logout' %}" class="btn btn-glass-danger px-4">
+            Logout
+        </a>
+    </div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

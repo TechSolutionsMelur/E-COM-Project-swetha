@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block title %}Step 4 — Payment Details{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    {% include 'restaurants/onboarding/_progress.html' with step=4 %}
+
+    <div class="row justify-content-center">
+    <div class="col-lg-8">
+    <div class="glass-card p-5">
+
+        <h3 class="fw-700 mb-1">Payment Details</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem;" class="mb-4">
+            Your earnings will be settled to this account every week.
+            All data is encrypted and stored securely.
+        </p>
+
+        <!-- Security note -->
+        <div class="glass-card p-3 mb-4"
+             style="border-color:rgba(16,185,129,0.3);
+                    background:rgba(16,185,129,0.05);">
+            <small style="color:#10b981;">
+                <i class="bi bi-lock-fill me-2"></i>
+                Your banking information is encrypted. We never share it with third parties.
+            </small>
+        </div>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            <!-- Payment Mode Toggle -->
+            <div class="mb-4">
+                <label class="glass-label">Payment Mode *</label>
+                <div class="payment-mode-group">
+                    <label class="payment-mode-option {% if form.payment_mode.value == 'bank' or not form.payment_mode.value %}active{% endif %}"
+                           id="mode-bank">
+                        <input type="radio" name="payment_mode" value="bank"
+                               {% if form.payment_mode.value == 'bank' or not form.payment_mode.value %}checked{% endif %}>
+                        <i class="bi bi-bank2"></i>
+                        <span>Bank Account</span>
+                    </label>
+                    <label class="payment-mode-option {% if form.payment_mode.value == 'upi' %}active{% endif %}"
+                           id="mode-upi">
+                        <input type="radio" name="payment_mode" value="upi"
+                               {% if form.payment_mode.value == 'upi' %}checked{% endif %}>
+                        <i class="bi bi-phone"></i>
+                        <span>UPI ID</span>
+                    </label>
+                    <label class="payment-mode-option {% if form.payment_mode.value == 'both' %}active{% endif %}"
+                           id="mode-both">
+                        <input type="radio" name="payment_mode" value="both"
+                               {% if form.payment_mode.value == 'both' %}checked{% endif %}>
+                        <i class="bi bi-layers"></i>
+                        <span>Both</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Bank Details Section -->
+            <div id="bank-section">
+                <div class="onboard-section-title mb-3">
+                    <i class="bi bi-bank2 text-accent me-2"></i>
+                    Bank Account Details
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="glass-label">Account Holder Name *</label>
+                        <input type="text" name="account_holder_name"
+                               value="{{ form.account_holder_name.value|default:'' }}"
+                               class="form-control glass-input {% if form.account_holder_name.errors %}is-invalid{% endif %}"
+                               placeholder="As per bank records">
+                        {% for e in form.account_holder_name.errors %}
+                            <div class="invalid-feedback">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Bank Name *</label>
+                        <input type="text" name="bank_name"
+                               value="{{ form.bank_name.value|default:'' }}"
+                               class="form-control glass-input {% if form.bank_name.errors %}is-invalid{% endif %}"
+                               placeholder="e.g. State Bank of India">
+                        {% for e in form.bank_name.errors %}
+                            <div class="invalid-feedback">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Account Number *</label>
+                        <div class="password-field-wrap">
+                            <input type="password" name="account_number"
+                                   value="{{ form.account_number.value|default:'' }}"
+                                   class="form-control glass-input {% if form.account_number.errors %}is-invalid{% endif %}"
+                                   placeholder="Enter account number"
+                                   id="account-number">
+                            <button type="button" class="toggle-eye"
+                                    onclick="toggleVisibility('account-number', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% for e in form.account_number.errors %}
+                            <div class="text-danger small mt-1">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Confirm Account Number *</label>
+                        <div class="password-field-wrap">
+                            <input type="password" name="confirm_account"
+                                   class="form-control glass-input {% if form.confirm_account.errors %}is-invalid{% endif %}"
+                                   placeholder="Re-enter account number"
+                                   id="confirm-account">
+                            <button type="button" class="toggle-eye"
+                                    onclick="toggleVisibility('confirm-account', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% for e in form.confirm_account.errors %}
+                            <div class="text-danger small mt-1">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">IFSC Code *</label>
+                        <input type="text" name="ifsc_code"
+                               value="{{ form.ifsc_code.value|default:'' }}"
+                               class="form-control glass-input {% if form.ifsc_code.errors %}is-invalid{% endif %}"
+                               placeholder="e.g. SBIN0001234"
+                               maxlength="11"
+                               style="text-transform:uppercase;">
+                        {% for e in form.ifsc_code.errors %}
+                            <div class="invalid-feedback">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Branch Name</label>
+                        <input type="text" name="branch_name"
+                               value="{{ form.branch_name.value|default:'' }}"
+                               class="form-control glass-input"
+                               placeholder="e.g. RS Puram Branch">
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPI Section -->
+            <div id="upi-section" style="display:none;">
+                <div class="onboard-section-title mb-3">
+                    <i class="bi bi-phone text-accent me-2"></i>
+                    UPI Details
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="glass-label">UPI ID *</label>
+                        <input type="text" name="upi_id"
+                               value="{{ form.upi_id.value|default:'' }}"
+                               class="form-control glass-input {% if form.upi_id.errors %}is-invalid{% endif %}"
+                               placeholder="e.g. restaurantname@upi">
+                        {% for e in form.upi_id.errors %}
+                            <div class="invalid-feedback">{{ e }}</div>
+                        {% endfor %}
+                        <small style="color:var(--text-muted);">
+                            Payments from customers will be settled to this UPI ID
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Non-field errors -->
+            {% if form.non_field_errors %}
+            <div class="alert glass-alert mb-3"
+                 style="border-color:rgba(220,53,69,0.4);">
+                {% for e in form.non_field_errors %}
+                    <small><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</small>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between mt-2">
+                <a href="{% url 'onboarding_step3' %}" class="btn btn-glass px-4">
+                    <i class="bi bi-arrow-left me-2"></i> Back
+                </a>
+                <button type="submit" class="btn btn-accent px-5 py-2">
+                    Save & Continue <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+
+        </form>
+    </div>
+    </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Payment mode toggle ──
+const radios   = document.querySelectorAll('[name="payment_mode"]');
+const bankSec  = document.getElementById('bank-section');
+const upiSec   = document.getElementById('upi-section');
+const modeOpts = document.querySelectorAll('.payment-mode-option');
+
+function applyMode(val) {
+    bankSec.style.display = (val === 'bank' || val === 'both') ? 'block' : 'none';
+    upiSec.style.display  = (val === 'upi'  || val === 'both') ? 'block' : 'none';
+    modeOpts.forEach(opt => opt.classList.remove('active'));
+    document.getElementById(`mode-${val}`)?.classList.add('active');
+}
+
+radios.forEach(r => r.addEventListener('change', () => applyMode(r.value)));
+modeOpts.forEach(opt => opt.addEventListener('click', () => {
+    const radio = opt.querySelector('input[type="radio"]');
+    if (radio) { radio.checked = true; applyMode(radio.value); }
+}));
+
+// Init on load
+const checked = document.querySelector('[name="payment_mode"]:checked');
+applyMode(checked ? checked.value : 'bank');
+
+// ── Auto-uppercase IFSC ──
+const ifsc = document.querySelector('[name="ifsc_code"]');
+if (ifsc) ifsc.addEventListener('input', () => ifsc.value = ifsc.value.toUpperCase());
+
+// ── Toggle password visibility ──
+function toggleVisibility(id, btn) {
+    const input = document.getElementById(id);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+</script>
+{% endblock %}

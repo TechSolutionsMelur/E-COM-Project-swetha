@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Placed — FoodRush{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-lg-7">
+
+    <!-- Success Card -->
+    <div class="glass-card p-5 text-center">
+
+        <div class="success-animation mb-4">
+            <div class="success-circle">
+                <i class="bi bi-check-lg"></i>
+            </div>
+        </div>
+
+        <h2 class="auth-heading">Order Placed! 🎉</h2>
+        <p style="color:var(--text-muted);" class="mt-2">
+            Your order has been confirmed and the restaurant
+            is preparing your food.
+        </p>
+
+        <!-- Order Number -->
+        <div class="order-number-badge">
+            <span style="color:var(--text-muted);
+                         font-size:0.8rem;">Order Number</span>
+            <span class="order-num">
+                #{{ order.order_number }}
+            </span>
+        </div>
+
+        <!-- Order Details -->
+        <div class="glass-card p-4 text-start my-4">
+
+            <div class="info-row">
+                <span class="info-label">Restaurant</span>
+                <span class="info-value fw-600">
+                    {{ order.restaurant.restaurant_name }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Items</span>
+                <span class="info-value">
+                    {{ order.items.count }}
+                    item{{ order.items.count|pluralize }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Total Paid</span>
+                <span class="info-value text-accent fw-700">
+                    ₹{{ order.total_amount }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Payment</span>
+                <span class="info-value">
+                    {{ order.get_payment_method_display }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Deliver To</span>
+                <span class="info-value">
+                    {{ order.delivery_name }},
+                    {{ order.delivery_city }}
+                </span>
+            </div>
+            {% if order.estimated_delivery %}
+            <div class="info-row">
+                <span class="info-label">ETA</span>
+                <span class="info-value" style="color:#10b981;">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ order.estimated_delivery|time:"g:i A" }}
+                    ({{ order.restaurant.avg_delivery_time }} mins)
+                </span>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="timeline text-start mb-4">
+            <div class="timeline-item done">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Order placed & confirmed</span>
+            </div>
+            <div class="timeline-item active">
+                <i class="bi bi-fire"></i>
+                <span>
+                    {{ order.restaurant.restaurant_name }}
+                    is preparing your food
+                </span>
+            </div>
+            <div class="timeline-item">
+                <i class="bi bi-bicycle"></i>
+                <span>Out for delivery</span>
+            </div>
+            <div class="timeline-item">
+                <i class="bi bi-house-check"></i>
+                <span>Delivered to your door</span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'order_detail' order.order_number %}"
+               class="btn btn-accent px-4">
+                <i class="bi bi-receipt me-2"></i>
+                Track Order
+            </a>
+            <a href="{% url 'landing' %}"
+               class="btn btn-glass px-4">
+                <i class="bi bi-shop me-2"></i>
+                Order More
+            </a>
+        </div>
+
+    </div>
+
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

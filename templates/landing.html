@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FoodRush — Delicious Food Delivered Fast{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/landing.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!--HERO SECTION -->
+<section class="hero-section">
+
+    <!-- Decorative rings -->
+    <div class="hero-ring ring-1"></div>
+    <div class="hero-ring ring-2"></div>
+    <div class="hero-ring ring-3"></div>
+
+    <div class="container hero-container">
+        <div class="row align-items-center">
+
+            <!-- Left: Copy -->
+            <div class="col-lg-6 hero-copy">
+                <div class="hero-eyebrow">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    Fast Delivery · Fresh Food · Best Prices
+                </div>
+
+                <h1 class="hero-heading">
+                    Hungry? <br>
+                    <span class="hero-gradient-text">We've Got You</span>
+                    <br>Covered.
+                </h1>
+
+                <p class="hero-subtext">
+                    Order from
+                    <strong class="text-accent">{{ total_restaurants }}+</strong>
+                    restaurants across
+                    <strong class="text-accent">{{ total_cities }}+</strong>
+                    cities. Hot food at your door in 30 minutes or less.
+                </p>
+
+                <!-- Search Bar -->
+                <form method="GET" action="{% url 'landing' %}"
+                      class="hero-search-form">
+                    <div class="hero-search-box">
+                        <i class="bi bi-search search-icon"></i>
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ query }}"
+                            class="hero-search-input"
+                            placeholder="Search restaurants, cuisines, dishes..."
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="hero-search-btn">
+                            Search
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Tags -->
+                <div class="hero-tags">
+                    <span class="tag-label">Popular:</span>
+                    {% for val, label in cuisine_choices|slice:":5" %}
+                    <a href="?category={{ val }}"
+                       class="hero-tag {% if selected_category == val %}active{% endif %}">
+                        {{ label }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right: Visual card stack -->
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+                <div class="hero-visual">
+
+                    <!-- Main floating card -->
+                    <div class="float-card float-card-main">
+                        <div class="float-card-img">
+                            <i class="bi bi-bag-heart-fill"></i>
+                        </div>
+                        <div>
+                            <div class="float-card-title">
+                                Order Placed! 🎉
+                            </div>
+                            <div class="float-card-sub">
+                                Arriving in 28 minutes
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats card -->
+                    <div class="float-card float-card-stats">
+                        <div class="stat-row">
+                            <i class="bi bi-shop-fill text-accent"></i>
+                            <span>
+                                <strong>{{ total_restaurants }}+</strong>
+                                Restaurants
+                            </span>
+                        </div>
+                        <div class="stat-row mt-2">
+                            <i class="bi bi-clock-fill text-accent"></i>
+                            <span><strong>30 min</strong> avg delivery</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery badge -->
+                    <div class="float-badge">
+                        <i class="bi bi-bicycle"></i>
+                        Live Tracking
+                    </div>
+
+                    <!-- Big emoji circle -->
+                    <div class="hero-emoji-circle">🍔</div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- CATEGORY PILLS -->
+<section class="category-section">
+    <div class="container">
+
+        <div class="section-header">
+            <h2 class="section-title">
+                What are you <span class="text-accent">craving?</span>
+            </h2>
+            <p class="section-sub">
+                Browse by cuisine and find exactly what you want
+            </p>
+        </div>
+
+        <div class="category-scroll">
+            <!-- All (clear filter) -->
+            <a href="{% url 'landing' %}{% if query %}?q={{ query }}{% endif %}"
+               class="category-pill {% if not selected_category %}active{% endif %}">
+                <div class="pill-icon">
+                    <i class="bi bi-grid-fill"></i>
+                </div>
+                <span>All</span>
+            </a>
+
+            <!-- Dynamic cuisine choices -->
+            {% for val, label in cuisine_choices %}
+            <a href="?category={{ val }}{% if query %}&q={{ query }}{% endif %}"
+               class="category-pill {% if selected_category == val %}active{% endif %}">
+                <div class="pill-icon">
+                    {% if val == 'south_indian' %}<i class="bi bi-egg-fried"></i>
+                    {% elif val == 'north_indian' %}<i class="bi bi-fire"></i>
+                    {% elif val == 'chinese' %}<i class="bi bi-basket2"></i>
+                    {% elif val == 'fast_food' %}<i class="bi bi-lightning-charge"></i>
+                    {% elif val == 'bakery' %}<i class="bi bi-cake2"></i>
+                    {% elif val == 'beverages' %}<i class="bi bi-cup-straw"></i>
+                    {% elif val == 'italian' %}<i class="bi bi-globe-americas"></i>
+                    {% elif val == 'continental' %}<i class="bi bi-star"></i>
+                    {% elif val == 'mexican' %}<i class="bi bi-tropical-storm"></i>
+                    {% else %}<i class="bi bi-bowl-hot"></i>
+                    {% endif %}
+                </div>
+                <span>{{ label }}</span>
+            </a>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+<!-- ── FILTER BAR ── -->
+<section style="padding: 0 0 20px;">
+<div class="container">
+    <form method="GET" action="{% url 'landing' %}"
+          class="filter-bar" id="filterForm">
+
+        {% if query %}
+        <input type="hidden" name="q" value="{{ query }}">
+        {% endif %}
+        {% if selected_category %}
+        <input type="hidden" name="category"
+               value="{{ selected_category }}">
+        {% endif %}
+
+        <!-- Open Now toggle -->
+        <label class="filter-chip
+            {% if open_only %}active{% endif %}">
+            <input type="checkbox" name="open"
+                   value="1"
+                   {% if open_only %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <i class="bi bi-circle-fill"
+               style="font-size:0.5rem; color:#10b981;"></i>
+            Open Now
+        </label>
+
+        <!-- Has Offer toggle -->
+        <label class="filter-chip
+            {% if has_offer %}active{% endif %}">
+            <input type="checkbox" name="offer"
+                   value="1"
+                   {% if has_offer %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <i class="bi bi-tag-fill text-accent"></i>
+            Has Offer
+        </label>
+
+        <!-- Sort -->
+        <select name="sort" class="glass-select-sm ms-auto"
+                onchange="document.getElementById(
+                    'filterForm').submit()">
+            <option value="newest"
+                {% if sort == 'newest' %}selected{% endif %}>
+                🕒 Newest First
+            </option>
+            <option value="delivery"
+                {% if sort == 'delivery' %}selected{% endif %}>
+                ⚡ Fastest Delivery
+            </option>
+            <option value="min_order"
+                {% if sort == 'min_order' %}selected{% endif %}>
+                💰 Lowest Min Order
+            </option>
+            <option value="name"
+                {% if sort == 'name' %}selected{% endif %}>
+                🔤 Name A–Z
+            </option>
+        </select>
+
+        <!-- Clear filters -->
+        {% if query or selected_category or open_only or has_offer %}
+        <a href="{% url 'landing' %}"
+           class="filter-clear-btn">
+            <i class="bi bi-x-circle me-1"></i>
+            Clear
+        </a>
+        {% endif %}
+
+    </form>
+</div>
+</section>
+
+<!-- RESTAURANTS GRID -->
+<section class="restaurants-section">
+    <div class="container">
+
+        <!-- Header + Sort -->
+        <div class="restaurants-header">
+            <div>
+                <h2 class="section-title">
+                    {% if query %}
+                        Results for
+                        <span class="text-accent">"{{ query }}"</span>
+                    {% elif selected_category %}
+                        {% for val, label in cuisine_choices %}
+                            {% if val == selected_category %}
+                                <span class="text-accent">{{ label }}</span>
+                            {% endif %}
+                        {% endfor %}
+                        Restaurants
+                    {% else %}
+                        All <span class="text-accent">Restaurants</span>
+                    {% endif %}
+                </h2>
+                <p class="section-sub">
+                    {{ restaurants|length }} restaurant{{ restaurants|length|pluralize }}
+                    available
+                </p>
+            </div>
+
+            <!-- Sort Dropdown -->
+            <form method="GET" action="{% url 'landing' %}" id="sort-form">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                {% if selected_category %}
+                    <input type="hidden" name="category" value="{{ selected_category }}">
+                {% endif %}
+                <select name="sort" class="glass-select-sm"
+                        onchange="document.getElementById('sort-form').submit()">
+                    <option value="newest"
+                        {% if sort == 'newest' %}selected{% endif %}>
+                        🕒 Newest First
+                    </option>
+                    <option value="delivery"
+                        {% if sort == 'delivery' %}selected{% endif %}>
+                        ⚡ Fastest Delivery
+                    </option>
+                    <option value="min_order"
+                        {% if sort == 'min_order' %}selected{% endif %}>
+                        💰 Lowest Min Order
+                    </option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Restaurant Cards Grid -->
+        {% if restaurants %}
+        <div class="restaurant-grid">
+            {% for restaurant in restaurants %}
+            <div class="restaurant-card" data-aos="fade-up">
+                <div class="card-cover">
+                    {% if restaurant.cover_image %}
+                        <img src="{{ restaurant.cover_image.url }}"
+                             alt="{{ restaurant.restaurant_name }}"
+                             class="cover-img">
+                    {% else %}
+                        <div class="cover-placeholder">
+                            <i class="bi bi-shop"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!---offer -->
+                    {% if restaurant.has_active_offer %}
+                    <span class="offer-pill">
+                        <i class="bi bi-tag-fill"></i> Offer
+                    </span>
+                    {% endif %}
+                    <!-- Cuisine Badge -->
+                    <span class="cuisine-badge">
+                        {{ restaurant.get_cuisine_type_display }}
+                    </span>
+
+                    <!-- Delivery time pill -->
+                    <span class="delivery-pill">
+                        <i class="bi bi-clock"></i>
+                        {{ restaurant.avg_delivery_time }} min
+                    </span>
+                    {% if restaurant.has_active_offer %}
+                    <span class="offer-pill">
+                        <i class="bi bi-tag-fill"></i> Offer
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body-custom">
+                    <div class="card-top-row">
+                        <h3 class="card-restaurant-name">
+                            {{ restaurant.restaurant_name }}
+                        </h3>
+                        <!-- Verified badge -->
+                        <span class="verified-badge"
+                              title="Verified by FoodDash">
+                            <i class="bi bi-patch-check-fill"></i>
+                        </span>
+                    </div>
+
+                    <p class="card-location">
+                        <i class="bi bi-geo-alt"></i>
+                        {{ restaurant.city }}, {{ restaurant.state }}
+                    </p>
+
+                    {% if restaurant.description %}
+                    <p class="card-desc">
+                        {{ restaurant.description|truncatechars:70 }}
+                    </p>
+                    {% endif %}
+
+                    <!-- Card Footer -->
+                    <div class="card-footer-custom">
+                        <div class="card-meta">
+                            <span class="meta-pill">
+                                <i class="bi bi-bag"></i>
+                                Min ₹{{ restaurant.min_order_amount|floatformat:0 }}
+                            </span>
+                            <span class="meta-pill">
+                                <i class="bi bi-grid"></i>
+                                {{ restaurant.menu_items.count }} items
+                            </span>
+                        </div>
+
+                        <a href="{% url 'restaurant_detail' restaurant.pk %}" class="btn-order-now">
+                            Order Now
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                {% if query %}
+                    <i class="bi bi-search"></i>
+                {% else %}
+                    <i class="bi bi-shop"></i>
+                {% endif %}
+            </div>
+            <h3>No restaurants found</h3>
+            <p>
+                {% if query %}
+                    No results for "<strong>{{ query }}</strong>".
+                    Try a different search term.
+                {% elif selected_category %}
+                    No restaurants in this category yet.
+                {% else %}
+                    No restaurants are available right now.
+                {% endif %}
+            </p>
+            <a href="{% url 'landing' %}" class="btn btn-accent px-4 mt-2">
+                <i class="bi bi-arrow-left me-2"></i> View All Restaurants
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+
+<!-- WHY FOODDASH SECTION -->
+<section class="why-section">
+    <div class="container">
+
+        <div class="section-header text-center">
+            <h2 class="section-title">
+                Why <span class="text-accent">FoodDash?</span>
+            </h2>
+            <p class="section-sub">
+                Built for people who take food seriously
+            </p>
+        </div>
+
+        <div class="why-grid">
+
+            <div class="why-card">
+                <div class="why-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <h4>Lightning Fast</h4>
+                <p>Average delivery in under 30 minutes.
+                   Real-time tracking so you always know where your food is.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon" style="background:rgba(123,47,247,0.15);
+                     border-color:rgba(123,47,247,0.3); color:#a78bfa;">
+                    <i class="bi bi-shield-check-fill"></i>
+                </div>
+                <h4>Verified Restaurants</h4>
+                <p>Every restaurant on FoodDash is FSSAI verified and
+                   approved by our quality team.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon" style="background:rgba(16,185,129,0.15);
+                     border-color:rgba(16,185,129,0.3); color:#10b981;">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <h4>Best Prices</h4>
+                <p>No hidden charges. What you see is what you pay.
+                   Regular offers and discounts from your favourites.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon" style="background:rgba(245,158,11,0.15);
+                     border-color:rgba(245,158,11,0.3); color:#f59e0b;">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h4>24/7 Support</h4>
+                <p>Something wrong with your order? Our support team
+                   is always available to make it right.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- CTA BANNER -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card">
+
+            <div class="cta-content">
+                <h2>Own a Restaurant?</h2>
+                <p>
+                    Join <strong>{{ total_restaurants }}+</strong> restaurants
+                    already on FoodDash and start receiving orders today.
+                </p>
+                <div class="cta-actions">
+                    <a href="{% url 'role_select' %}"
+                       class="btn btn-accent px-5 py-2">
+                        <i class="bi bi-shop me-2"></i>
+                        Partner With Us
+                    </a>
+                    <a href="{% url 'login' %}"
+                       class="btn btn-glass px-5 py-2">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Sign In
+                    </a>
+                </div>
+            </div>
+
+            <div class="cta-visual d-none d-md-flex">
+                <div class="cta-emoji">🍽️</div>
+                <div class="cta-emoji cta-emoji-2">💰</div>
+                <div class="cta-emoji cta-emoji-3">📱</div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// ── Scroll-reveal for restaurant cards ──
+const cards = document.querySelectorAll('[data-aos]');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+            setTimeout(() => {
+                entry.target.classList.add('aos-animate');
+            }, i * 80);
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+cards.forEach(card => observer.observe(card));
+
+// ── Hero search: live suggestions placeholder ──
+const searchInput = document.querySelector('.hero-search-input');
+if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') e.target.closest('form').submit();
+    });
+}
+
+// ── Category pill horizontal scroll with mouse drag ──
+const scroll = document.querySelector('.category-scroll');
+if (scroll) {
+    let isDown = false, startX, scrollLeft;
+    scroll.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - scroll.offsetLeft;
+        scrollLeft = scroll.scrollLeft;
+    });
+    scroll.addEventListener('mouseleave', () => isDown = false);
+    scroll.addEventListener('mouseup',    () => isDown = false);
+    scroll.addEventListener('mousemove',  (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x    = e.pageX - scroll.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        scroll.scrollLeft = scrollLeft - walk;
+    });
+}
+</script>
+{% endblock %}

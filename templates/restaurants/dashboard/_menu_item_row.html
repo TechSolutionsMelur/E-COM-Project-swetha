@@ -1,0 +1,68 @@
+<div class="menu-item-row {% if not item.is_available %}item-unavailable{% endif %}">
+
+    <!-- Image -->
+    <div class="item-img-wrap">
+        {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}"
+                 class="item-thumb">
+        {% else %}
+            <div class="item-thumb-placeholder">
+                <i class="bi bi-image"></i>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Veg / Non-veg dot -->
+    <div class="veg-dot-wrap">
+        <div class="veg-indicator
+            {% if item.item_type == 'veg' %}veg
+            {% elif item.item_type == 'vegan' %}vegan
+            {% else %}nonveg{% endif %}"
+             title="{{ item.get_item_type_display }}">
+        </div>
+    </div>
+
+    <!-- Name + desc -->
+    <div class="item-details">
+        <span class="item-name">
+            {{ item.name }}
+            {% if item.is_featured %}
+                <i class="bi bi-star-fill text-warning ms-1"
+                   style="font-size:0.75rem;" title="Featured"></i>
+            {% endif %}
+        </span>
+        {% if item.description %}
+        <span class="item-desc">
+            {{ item.description|truncatechars:55 }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Price -->
+    <div class="item-price">₹{{ item.price }}</div>
+
+    <!-- Availability toggle -->
+    <div class="item-avail">
+        <a href="{% url 'menu_item_toggle' item.pk %}"
+           class="avail-toggle {% if item.is_available %}on{% else %}off{% endif %}"
+           title="Toggle availability">
+            <span class="toggle-knob"></span>
+        </a>
+        <span class="avail-label">
+            {% if item.is_available %}On{% else %}Off{% endif %}
+        </span>
+    </div>
+
+    <!-- Actions -->
+    <div class="item-actions">
+        <a href="{% url 'menu_item_edit' item.pk %}"
+           class="btn-item-action edit" title="Edit">
+            <i class="bi bi-pencil"></i>
+        </a>
+        <a href="{% url 'menu_item_delete' item.pk %}"
+           class="btn-item-action delete" title="Delete">
+            <i class="bi bi-trash3"></i>
+        </a>
+    </div>
+
+</div>

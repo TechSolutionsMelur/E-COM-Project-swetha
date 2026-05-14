@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% block title %}Step 5 — Document Upload{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    {% include 'restaurants/onboarding/_progress.html' with step=5 %}
+
+    <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <!-- Already Uploaded Documents -->
+        {% if documents %}
+        <div class="glass-card p-4 mb-4">
+            <h6 class="fw-600 mb-3">
+                <i class="bi bi-folder2-open text-accent me-2"></i>
+                Uploaded Documents
+                <span class="badge ms-2"
+                      style="background:rgba(255,107,53,0.2);
+                             color:var(--accent);
+                             border:1px solid rgba(255,107,53,0.3);
+                             font-size:0.75rem;">
+                    {{ documents.count }}
+                </span>
+            </h6>
+            <div class="row g-3">
+                {% for doc in documents %}
+                <div class="col-md-6">
+                    <div class="doc-card">
+                        <div class="doc-icon">
+                            {% if doc.is_image %}
+                                <i class="bi bi-file-image-fill"></i>
+                            {% else %}
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            {% endif %}
+                        </div>
+                        <div class="doc-info">
+                            <span class="doc-type">
+                                {{ doc.get_doc_type_display }}
+                            </span>
+                            <span class="doc-name">{{ doc.filename }}</span>
+                            {% if doc.description %}
+                            <span class="doc-desc">{{ doc.description }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="doc-actions">
+                            <a href="{{ doc.file.url }}" target="_blank"
+                               class="btn-doc-view" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_doc" value="{{ doc.id }}">
+                                <button type="submit" class="btn-doc-delete"
+                                        title="Remove"
+                                        onclick="return confirm('Remove this document?')">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Upload Form -->
+        <div class="glass-card p-5">
+            <h3 class="fw-700 mb-1">Document Upload</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;" class="mb-4">
+                Upload clear scanned copies or photos of your documents.
+                <strong class="text-accent">FSSAI license is mandatory.</strong>
+                Max file size: 5MB. Accepted: PDF, JPG, PNG, WEBP.
+            </p>
+
+            <!-- Required docs checklist -->
+            <div class="glass-card p-3 mb-4"
+                 style="border-color:rgba(255,107,53,0.2);">
+                <small class="fw-600 d-block mb-2" style="color:var(--text-muted);">
+                    Document Checklist:
+                </small>
+                <div class="doc-checklist">
+                    <span class="check-item {% if has_fssai %}done{% endif %}">
+                        <i class="bi bi-{% if has_fssai %}check-circle-fill{% else %}circle{% endif %}"></i>
+                        FSSAI License <span class="text-accent">*</span>
+                    </span>
+                    <span class="check-item {% if documents|length > 1 %}done{% endif %}">
+                        <i class="bi bi-{% if documents|length > 1 %}check-circle-fill{% else %}circle{% endif %}"></i>
+                        Bank Proof / Cancelled Cheque
+                    </span>
+                    <span class="check-item {% if documents|length > 2 %}done{% endif %}">
+                        <i class="bi bi-{% if documents|length > 2 %}check-circle-fill{% else %}circle{% endif %}"></i>
+                        Restaurant Photo
+                    </span>
+                </div>
+            </div>
+
+            <!-- Upload form -->
+            <form method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Document Type *</label>
+                        <select name="doc_type"
+                                class="form-control glass-input glass-select">
+                            {% for val, label in form.fields.doc_type.choices %}
+                            <option value="{{ val }}"
+                                {% if form.doc_type.value == val %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% for e in form.doc_type.errors %}
+                            <div class="text-danger small mt-1">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="glass-label">Description</label>
+                        <input type="text" name="description"
+                               value="{{ form.description.value|default:'' }}"
+                               class="form-control glass-input"
+                               placeholder="Optional note about this file">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="glass-label">File *</label>
+                        <div class="file-drop-zone" id="drop-zone">
+                            <input type="file" name="file"
+                                   id="file-input"
+                                   class="file-hidden-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp">
+                            <div class="file-drop-content" id="drop-content">
+                                <i class="bi bi-cloud-upload-fill"></i>
+                                <p>Drag & drop your file here or
+                                    <span class="text-accent">browse</span>
+                                </p>
+                                <small style="color:var(--text-muted);">
+                                    PDF, JPG, PNG, WEBP — max 5MB
+                                </small>
+                            </div>
+                            <div class="file-selected" id="file-selected"
+                                 style="display:none;">
+                                <i class="bi bi-file-earmark-check-fill text-accent"></i>
+                                <span id="file-name">No file chosen</span>
+                                <button type="button" class="btn-clear-file"
+                                        onclick="clearFile()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% for e in form.file.errors %}
+                            <div class="text-danger small mt-1">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-glass px-5">
+                        <i class="bi bi-upload me-2"></i> Upload Document
+                    </button>
+                </div>
+            </form>
+
+            <hr class="glass-divider my-4">
+
+            <!-- Final Submit -->
+            <div class="text-center">
+                <p style="color:var(--text-muted); font-size:0.9rem;" class="mb-3">
+                    All documents uploaded? Submit your application for review.
+                </p>
+
+                {% if not has_fssai %}
+                <div class="alert glass-alert mb-3"
+                     style="border-color:rgba(245,158,11,0.4);
+                            background:rgba(245,158,11,0.05);">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    <small>Please upload your <strong>FSSAI license</strong>
+                    before submitting.</small>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'onboarding_step4' %}" class="btn btn-glass px-4">
+                        <i class="bi bi-arrow-left me-2"></i> Back
+                    </a>
+                    <a href="{% url 'onboarding_submit' %}"
+                       class="btn btn-accent px-5 py-2
+                              {% if not has_fssai %}disabled{% endif %}"
+                       {% if not has_fssai %}
+                           onclick="return false;"
+                           title="Upload FSSAI license first"
+                       {% endif %}>
+                        <i class="bi bi-send-fill me-2"></i>
+                        Submit for Review
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dropZone    = document.getElementById('drop-zone');
+const fileInput   = document.getElementById('file-input');
+const dropContent = document.getElementById('drop-content');
+const fileSelected= document.getElementById('file-selected');
+const fileNameEl  = document.getElementById('file-name');
+
+// Click to browse
+dropZone.addEventListener('click', (e) => {
+    if (!e.target.closest('.btn-clear-file')) fileInput.click();
+});
+
+// File chosen
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) showFile(fileInput.files[0]);
+});
+
+function showFile(file) {
+    fileNameEl.textContent = file.name;
+    dropContent.style.display = 'none';
+    fileSelected.style.display = 'flex';
+    dropZone.style.borderColor = 'rgba(255,107,53,0.6)';
+}
+
+function clearFile() {
+    fileInput.value = '';
+    fileNameEl.textContent = '';
+    dropContent.style.display = 'flex';
+    fileSelected.style.display = 'none';
+    dropZone.style.borderColor = '';
+}
+
+// Drag and drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        showFile(file);
+    }
+});
+</script>
+{% endblock %}

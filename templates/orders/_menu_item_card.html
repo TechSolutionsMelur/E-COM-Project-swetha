@@ -1,0 +1,85 @@
+{% load cart_tag %}
+{% load static %}
+<div class="menu-item-card" data-item-id="{{ item.pk }}"
+     id="menuItem{{ item.pk }}">
+
+    <!-- Image -->
+    {% if item.image %}
+    <div class="mcard-img">
+        <img src="{{ item.image.url }}" alt="{{ item.name }}">
+    </div>
+    {% endif %}
+
+    <!-- Content -->
+    <div class="mcard-content">
+
+        <div class="mcard-header">
+            <!-- Veg/NonVeg dot -->
+            <span class="veg-dot
+                {% if item.item_type == 'veg' %}veg
+                {% elif item.item_type == 'vegan' %}vegan
+                {% else %}nonveg{% endif %}"
+                  title="{{ item.get_item_type_display }}">
+            </span>
+
+            {% if item.is_featured %}
+            <span class="featured-tag">
+                <i class="bi bi-star-fill"></i> Best Seller
+            </span>
+            {% endif %}
+        </div>
+
+        <h6 class="mcard-name">{{ item.name }}</h6>
+
+        {% if item.description %}
+        <p class="mcard-desc">
+            {{ item.description|truncatechars:80 }}
+        </p>
+        {% endif %}
+
+        <div class="mcard-footer">
+            <span class="mcard-price">₹{{ item.price }}</span>
+
+            {% if user.is_authenticated and user.role == 'customer' %}
+            <!-- Add / Qty controls -->
+            <div class="mcard-controls" id="controls{{ item.pk }}">
+                {% if cart_item_map|default_if_none:"" %}
+                    {% if item.pk in cart_item_map %}
+                    <!-- Already in cart — show qty controls -->
+                    <div class="qty-controls active">
+                        <button class="qty-btn minus"
+                                onclick="removeItem({{ item.pk }})">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="qty-value"
+                              id="qty{{ item.pk }}">
+                            {{ cart_item_map|get_item:item.pk }}
+                        </span>
+                        <button class="qty-btn plus"
+                                onclick="addItem({{ item.pk }})">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <!-- Not in cart -->
+                    <button class="btn-add-item"
+                            onclick="addItem({{ item.pk }})">
+                        <i class="bi bi-plus"></i> Add
+                    </button>
+                    {% endif %}
+                {% else %}
+                <button class="btn-add-item"
+                        onclick="addItem({{ item.pk }})">
+                    <i class="bi bi-plus"></i> Add
+                </button>
+                {% endif %}
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn-add-item">
+                <i class="bi bi-plus"></i> Add
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+</div>

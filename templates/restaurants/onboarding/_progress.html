@@ -1,0 +1,16 @@
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0" style="color:var(--text-muted);">Restaurant Onboarding</h6>
+        <span class="text-accent fw-600">Step {{ step }} of 5</span>
+    </div>
+    <div class="onboard-progress mb-3">
+        <div class="onboard-bar" style="width: {% widthratio step 5 100 %}%;"></div>
+    </div>
+    <div class="d-flex justify-content-between px-1">       
+        <span class="progress-label {% if step >= 1 %}done{% endif %}">Business</span>
+        <span class="progress-label {% if step >= 2 %}done{% endif %}">Address</span>
+        <span class="progress-label {% if step >= 3 %}done{% endif %}">Legal</span>
+        <span class="progress-label {% if step >= 4 %}done{% endif %}">Payment</span>
+        <span class="progress-label {% if step >= 5 %}done{% endif %}">Documents</span>
+    </div>
+</div>

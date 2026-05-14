@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'style/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert glass-alert alert-{{ message.tags }}
+                        alert-dismissible fade show mb-4">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Back + Title -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a href="{% url 'restaurant_orders' %}"
+                   class="btn btn-glass btn-sm px-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h4 class="fw-700 mb-0">
+                        Order #{{ order.order_number }}
+                    </h4>
+                    <p style="color:var(--text-muted);
+                               font-size:0.85rem; margin:0;">
+                        {{ order.placed_at|date:"d M Y, g:i A" }}
+                        · {{ order.placed_at|timesince }} ago
+                    </p>
+                </div>
+                <span class="order-status-badge
+                             status-{{ order.status }} ms-auto">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- Left: Items + Customer -->
+                <div class="col-lg-7">
+
+                    <!-- Items -->
+                    <div class="dash-card mb-4">
+                        <div class="dash-card-header">
+                            <h6>
+                                <i class="bi bi-bag-fill
+                                           text-accent me-2"></i>
+                                {{ order.items.count }}
+                                Item{{ order.items.count|pluralize }}
+                                Ordered
+                            </h6>
+                        </div>
+                        <div class="cart-full-list">
+                            {% for oi in order.items.all %}
+                            <div class="cart-full-row">
+                                <div class="cart-full-info">
+                                    <div class="d-flex
+                                                align-items-center
+                                                gap-2">
+                                        <span class="veg-dot
+                                            {% if oi.item_type == 'veg' %}
+                                            veg{% else %}nonveg{% endif %}">
+                                        </span>
+                                        <span class="fw-600">
+                                            {{ oi.item_name }}
+                                        </span>
+                                    </div>
+                                    <small style="color:var(--text-muted);">
+                                        ₹{{ oi.item_price }} each
+                                    </small>
+                                </div>
+                                <div class="cart-full-right">
+                                    <span style="color:var(--text-muted);
+                                                  font-size:0.85rem;">
+                                        × {{ oi.quantity }}
+                                    </span>
+                                    <span class="cart-full-total">
+                                        ₹{{ oi.item_total }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="dash-card p-4">
+                        <h6 class="fw-700 mb-3">
+                            <i class="bi bi-person-circle
+                                       text-accent me-2"></i>
+                            Customer & Delivery
+                        </h6>
+                        <div class="info-row">
+                            <span class="info-label">Name</span>
+                            <span class="info-value">
+                                {{ order.delivery_name }}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">
+                                <a href="tel:{{ order.delivery_phone }}"
+                                   class="text-accent
+                                          text-decoration-none">
+                                    {{ order.delivery_phone }}
+                                </a>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">
+                                {{ order.delivery_address }},
+                                {{ order.delivery_city }}
+                                — {{ order.delivery_pincode }}
+                            </span>
+                        </div>
+                        {% if order.special_instructions %}
+                        <div class="info-row">
+                            <span class="info-label">Note</span>
+                            <span class="info-value"
+                                  style="color:var(--warning);">
+                                <i class="bi bi-exclamation-circle
+                                           me-1"></i>
+                                {{ order.special_instructions }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- Right: Bill + Status Control -->
+                <div class="col-lg-5">
+
+                    <!-- Bill -->
+                    <div class="dash-card p-4 mb-4">
+                        <h6 class="fw-700 mb-3">
+                            <i class="bi bi-receipt
+                                       text-accent me-2"></i>
+                            Bill Summary
+                        </h6>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>₹{{ order.subtotal }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery Fee</span>
+                            <span>₹{{ order.delivery_fee }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>GST</span>
+                            <span>₹{{ order.taxes }}</span>
+                        </div>
+                        <hr style="border-color:var(--glass-border);">
+                        <div class="summary-row total-row">
+                            <span>Total</span>
+                            <span class="text-accent fw-700">
+                                ₹{{ order.total_amount }}
+                            </span>
+                        </div>
+                        <div class="summary-row mt-1">
+                            <span>Payment</span>
+                            <span>
+                                {{ order.get_payment_method_display }}
+                                {% if order.is_paid %}
+                                <span style="color:#10b981;
+                                              font-size:0.75rem;">
+                                    ✓ Paid
+                                </span>
+                                {% else %}
+                                <span style="color:#f59e0b;
+                                              font-size:0.75rem;">
+                                    Pending
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Status Update Panel -->
+                    <div class="dash-card p-4">
+                        <h6 class="fw-700 mb-3">
+                            <i class="bi bi-arrow-repeat
+                                       text-accent me-2"></i>
+                            Update Order Status
+                        </h6>
+
+                        <!-- Visual status stepper -->
+                        <div class="order-stepper mb-4">
+                            {% for st, label in order.ORDER_STATUS %}
+                            {% if st != 'cancelled' %}
+                            <div class="stepper-step
+                                {% if order.status == st %}current
+                                {% elif order.status == 'delivered' %}done
+                                {% elif order.status == 'cancelled' %}cancelled
+                                {% elif forloop.counter <= order.status|default:0 %}done
+                                {% endif %}">
+                                <div class="step-dot"></div>
+                                <span class="step-label">{{ label }}</span>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Action buttons based on current status -->
+                        {% if order.status == 'pending' %}
+                        <div class="d-flex flex-column gap-2">
+                            <form method="POST"
+                                  action="{% url 'update_order_status' order.order_number %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status"
+                                       value="confirmed">
+                                <button type="submit"
+                                        class="btn btn-accent w-100 py-2">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Accept Order
+                                </button>
+                            </form>
+                            <form method="POST"
+                                  action="{% url 'update_order_status' order.order_number %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status"
+                                       value="cancelled">
+                                <button type="submit"
+                                        class="btn btn-glass-danger w-100 py-2"
+                                        onclick="return confirm(
+                                            'Cancel this order?')">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Reject Order
+                                </button>
+                            </form>
+                        </div>
+
+                        {% elif order.status == 'confirmed' %}
+                        <div class="d-flex flex-column gap-2">
+                            <form method="POST"
+                                  action="{% url 'update_order_status' order.order_number %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status"
+                                       value="preparing">
+                                <button type="submit"
+                                        class="btn btn-accent w-100 py-2">
+                                    <i class="bi bi-fire me-2"></i>
+                                    Start Preparing
+                                </button>
+                            </form>
+                        </div>
+
+                        {% elif order.status == 'preparing' %}
+                        <form method="POST"
+                              action="{% url 'update_order_status' order.order_number %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status"
+                                   value="out">
+                            <button type="submit"
+                                    class="btn btn-accent w-100 py-2">
+                                <i class="bi bi-bicycle me-2"></i>
+                                Out for Delivery
+                            </button>
+                        </form>
+
+                        {% elif order.status == 'out' %}
+                        <form method="POST"
+                              action="{% url 'update_order_status' order.order_number %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status"
+                                   value="delivered">
+                            <button type="submit"
+                                    class="btn btn-accent w-100 py-2">
+                                <i class="bi bi-house-check me-2"></i>
+                                Mark as Delivered
+                            </button>
+                        </form>
+
+                        {% elif order.status == 'delivered' %}
+                        <div class="text-center p-3"
+                             style="background:rgba(16,185,129,0.08);
+                                    border:1px solid rgba(16,185,129,0.2);
+                                    border-radius:var(--radius-sm);">
+                            <i class="bi bi-check-circle-fill
+                                       text-success mb-2 d-block"
+                               style="font-size:1.5rem;"></i>
+                            <span style="color:#10b981; font-weight:600;">
+                                Order Delivered Successfully
+                            </span>
+                        </div>
+
+                        {% elif order.status == 'cancelled' %}
+                        <div class="text-center p-3"
+                             style="background:rgba(239,68,68,0.08);
+                                    border:1px solid rgba(239,68,68,0.2);
+                                    border-radius:var(--radius-sm);">
+                            <i class="bi bi-x-circle-fill mb-2 d-block"
+                               style="font-size:1.5rem;
+                                      color:#f87171;"></i>
+                            <span style="color:#f87171;
+                                          font-weight:600;">
+                                Order Cancelled
+                            </span>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

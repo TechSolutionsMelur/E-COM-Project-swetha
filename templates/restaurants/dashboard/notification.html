@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+            <div class="mb-4">
+                <h4 class="fw-700 mb-1">Notifications</h4>
+                <p style="color:var(--text-muted); font-size:0.9rem;">
+                    Recent order activity
+                </p>
+            </div>
+
+            {% if notifications %}
+            <div class="dash-card">
+                <div class="notif-list">
+                    {% for n in notifications %}
+                    <a href="{% url 'restaurant_order_detail' n.order.order_number %}"
+                       class="notif-item text-decoration-none">
+                        <div class="notif-icon"
+                             style="background:{{ n.color }}20;
+                                    color:{{ n.color }};
+                                    border-color:{{ n.color }}40;">
+                            <i class="bi bi-{{ n.icon }}"></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-msg">{{ n.message }}</p>
+                            <span class="notif-time">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ n.time|timesince }} ago
+                            </span>
+                        </div>
+                        <div class="notif-amount">
+                            ₹{{ n.order.total_amount }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-bell-slash"></i>
+                </div>
+                <h3>No notifications</h3>
+                <p style="color:var(--text-muted);">
+                    Order activity will appear here.
+                </p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

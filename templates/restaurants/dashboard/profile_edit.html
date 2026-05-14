@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Profile — {{ profile.restaurant_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+        <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert glass-alert alert-{{ message.tags }}
+                        alert-dismissible fade show mb-4">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h6>
+                        <i class="bi bi-person-gear text-accent me-2"></i>
+                        Profile & Settings
+                    </h6>
+                </div>
+                <div class="dash-card-body">
+
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Basic Info -->
+                <div class="onboard-section-title mb-3">
+                    <i class="bi bi-info-circle text-accent me-2"></i>
+                    Basic Information
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="glass-label">Restaurant Name</label>
+                        <input type="text" name="restaurant_name"
+                               value="{{ form.restaurant_name.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">Cuisine Type</label>
+                        <select name="cuisine_type"
+                                class="form-control glass-input glass-select">
+                            {% for val, label in form.fields.cuisine_type.choices %}
+                            <option value="{{ val }}"
+                                {% if form.cuisine_type.value == val %}
+                                selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="glass-label">Description</label>
+                        <textarea name="description" rows="3"
+                                  class="form-control glass-input">{{ form.description.value|default:'' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">Primary Phone</label>
+                        <input type="text" name="owner_phone"
+                               value="{{ form.owner_phone.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">Alternate Phone</label>
+                        <input type="text" name="alternate_phone"
+                               value="{{ form.alternate_phone.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-12">
+                        <label class="glass-label">Cover Image</label>
+                        {% if profile.cover_image %}
+                        <div class="mb-2">
+                            <img src="{{ profile.cover_image.url }}"
+                                 style="height:80px; border-radius:10px;
+                                        object-fit:cover;">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="cover_image"
+                               class="form-control glass-input"
+                               accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="onboard-section-title mb-3">
+                    <i class="bi bi-geo-alt text-accent me-2"></i>
+                    Address
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="glass-label">Address Line 1</label>
+                        <input type="text" name="address_line1"
+                               value="{{ form.address_line1.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-12">
+                        <label class="glass-label">Address Line 2</label>
+                        <input type="text" name="address_line2"
+                               value="{{ form.address_line2.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="glass-label">City</label>
+                        <input type="text" name="city"
+                               value="{{ form.city.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="glass-label">State</label>
+                        <input type="text" name="state"
+                               value="{{ form.state.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="glass-label">PIN Code</label>
+                        <input type="text" name="pincode"
+                               value="{{ form.pincode.value|default:'' }}"
+                               class="form-control glass-input">
+                    </div>
+                </div>
+
+                <!-- Operations -->
+                <div class="onboard-section-title mb-3">
+                    <i class="bi bi-clock text-accent me-2"></i>
+                    Operations
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="glass-label">Opening Time</label>
+                        <input type="time" name="opening_time"
+                               value="{{ form.opening_time.value|default:'09:00' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">Closing Time</label>
+                        <input type="time" name="closing_time"
+                               value="{{ form.closing_time.value|default:'22:00' }}"
+                               class="form-control glass-input">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">
+                            Avg Delivery Time (mins)
+                        </label>
+                        <input type="number" name="avg_delivery_time"
+                               value="{{ form.avg_delivery_time.value|default:'30' }}"
+                               class="form-control glass-input"
+                               min="10" max="120">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="glass-label">Min Order Amount (₹)</label>
+                        <input type="number" name="min_order_amount"
+                               value="{{ form.min_order_amount.value|default:'0' }}"
+                               class="form-control glass-input"
+                               min="0">
+                    </div>
+
+                    <!-- Toggles -->
+                    <div class="col-md-6">
+                        <div class="toggle-field">
+                            <div>
+                                <span class="glass-label d-block">
+                                    Restaurant Open
+                                </span>
+                                <small style="color:var(--text-muted);">
+                                    Visible to customers
+                                </small>
+                            </div>
+                            <label class="switch-toggle">
+                                <input type="checkbox" name="is_open"
+                                       {% if form.is_open.value %}
+                                       checked{% endif %}>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="toggle-field">
+                            <div>
+                                <span class="glass-label d-block">
+                                    Online Orders
+                                </span>
+                                <small style="color:var(--text-muted);">
+                                    Accept orders online
+                                </small>
+                            </div>
+                            <label class="switch-toggle">
+                                <input type="checkbox"
+                                       name="accepts_online_orders"
+                                       {% if form.accepts_online_orders.value %}
+                                       checked{% endif %}>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="save-hint" style="color:var(--text-muted);
+                                                font-size:0.82rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Changes are saved immediately.
+                    </span>
+                    <button type="submit" class="btn btn-accent px-5 py-2"
+                            id="saveProfileBtn">
+                        <i class="bi bi-check-lg me-2" id="saveBtnIcon"></i>
+                        <span id="saveBtnText">Save Changes</span>
+                    </button>
+                </div>
+
+                </form>
+                </div>
+            </div>
+
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+// ── Save button loading state ──
+const profileForm = document.querySelector('.dash-card-body form');
+const saveBtn     = document.getElementById('saveProfileBtn');
+const saveBtnIcon = document.getElementById('saveBtnIcon');
+const saveBtnText = document.getElementById('saveBtnText');
+
+if (profileForm && saveBtn) {
+    profileForm.addEventListener('submit', () => {
+        // Show loading state
+        saveBtn.disabled         = true;
+        saveBtnIcon.className    = 'bi bi-arrow-repeat me-2 spin-icon';
+        saveBtnText.textContent  = 'Saving...';
+        saveBtn.style.opacity    = '0.8';
+    });
+}
+
+// ── If success message is present, show saved state briefly ──
+const hasSuccess = document.querySelector('.alert-success, .alert-None');
+if (hasSuccess && saveBtn) {
+    saveBtnIcon.className   = 'bi bi-check2-all me-2';
+    saveBtnText.textContent = 'Saved!';
+    saveBtn.style.background= 'linear-gradient(135deg,#10b981,#059669)';
+    saveBtn.style.boxShadow = '0 4px 15px rgba(16,185,129,0.4)';
+
+    // Scroll to top to show success message
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Restore after 3 seconds
+    setTimeout(() => {
+        saveBtnIcon.className   = 'bi bi-check-lg me-2';
+        saveBtnText.textContent = 'Save Changes';
+        saveBtn.style.background= '';
+        saveBtn.style.boxShadow = '';
+        saveBtn.disabled        = false;
+    }, 3000);
+}
+</script>
+{% endblock %}

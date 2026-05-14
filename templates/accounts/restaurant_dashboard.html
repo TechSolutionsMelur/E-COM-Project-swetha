@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Restaurant Dashboard — FoodRuh{% endblock %}
+    
+{% block content %}
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="glass-card p-5 text-center">
+            <div class="role-icon role-icon-alt mb-4"><i class="bi bi-shop-window"></i></div>
+            <h2 class="auth-heading">Restaurant Dashboard</h2>
+            <p style="color: var(--text-muted);">
+                Welcome, <span class="text-accent fw-600">{{ user.username }}</span>!
+                Manage your restaurant from here.
+            </p>
+            <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+                <a href="#" class="btn btn-accent px-4 py-2">
+                    <i class="bi bi-plus-circle me-2"></i> Add Menu Item
+                </a>
+                <a href="#" class="btn btn-glass px-4 py-2">
+                    <i class="bi bi-receipt me-2"></i> View Orders
+                </a>
+            </div>
+            <p class="mt-4" style="color: var(--text-muted); font-size: 0.85rem;">
+                Full dashboard coming in Step 4 (Restaurant Dashboard)
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

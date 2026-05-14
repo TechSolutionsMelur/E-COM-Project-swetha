@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Offers — {{ profile.restaurant_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert glass-alert alert-{{ message.tags }}
+                        alert-dismissible fade show mb-4">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="d-flex justify-content-between
+                        align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h4 class="fw-700 mb-1">Offers & Discounts</h4>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">
+                        Create promo codes to attract more customers
+                    </p>
+                </div>
+                <a href="{% url 'offer_add' %}"
+                   class="btn btn-accent px-4">
+                    <i class="bi bi-plus-lg me-2"></i>
+                    Create Offer
+                </a>
+            </div>
+
+            {% if offers %}
+            <div class="offers-grid">
+                {% for offer in offers %}
+                <div class="offer-card
+                    {% if not offer.is_active %}offer-inactive{% endif %}">
+
+                    <!-- Header -->
+                    <div class="offer-card-header">
+                        <div class="offer-code-badge">
+                            <i class="bi bi-tag-fill me-1"></i>
+                            {{ offer.code }}
+                        </div>
+                        <span class="offer-type-badge">
+                            {{ offer.get_discount_type_display }}
+                        </span>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="offer-card-body">
+                        <h6 class="fw-700 mb-1">{{ offer.title }}</h6>
+                        {% if offer.description %}
+                        <p class="offer-desc">{{ offer.description }}</p>
+                        {% endif %}
+
+                        <div class="offer-details">
+                            <div class="offer-detail-row">
+                                <i class="bi bi-percent text-accent"></i>
+                                <span>
+                                    {% if offer.discount_type == 'percent' %}
+                                        {{ offer.discount_value }}% off
+                                        {% if offer.max_discount %}
+                                            (max ₹{{ offer.max_discount }})
+                                        {% endif %}
+                                    {% elif offer.discount_type == 'flat' %}
+                                        ₹{{ offer.discount_value }} off
+                                    {% elif offer.discount_type == 'delivery' %}
+                                        Free Delivery
+                                    {% else %}
+                                        Buy 1 Get 1
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="offer-detail-row">
+                                <i class="bi bi-bag text-accent"></i>
+                                <span>
+                                    Min order ₹{{ offer.min_order_value }}
+                                </span>
+                            </div>
+                            {% if offer.valid_until %}
+                            <div class="offer-detail-row">
+                                <i class="bi bi-calendar-x text-accent"></i>
+                                <span>
+                                    Expires
+                                    {{ offer.valid_until|date:"d M Y" }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            <div class="offer-detail-row">
+                                <i class="bi bi-people text-accent"></i>
+                                <span>
+                                    Used {{ offer.used_count }}
+                                    {% if offer.usage_limit %}
+                                        / {{ offer.usage_limit }}
+                                    {% else %}
+                                        times
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="offer-card-footer">
+                        <!-- Active toggle -->
+                        <form method="POST"
+                              action="{% url 'offer_toggle' offer.pk %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="offer-toggle-btn
+                                    {% if offer.is_active %}on{% else %}off{% endif %}">
+                                {% if offer.is_active %}
+                                    <i class="bi bi-toggle-on"></i>
+                                    Active
+                                {% else %}
+                                    <i class="bi bi-toggle-off"></i>
+                                    Inactive
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'offer_edit' offer.pk %}"
+                               class="btn-item-action edit"
+                               title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST"
+                                  action="{% url 'offer_delete' offer.pk %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn-item-action delete"
+                                        title="Delete"
+                                        onclick="return confirm(
+                                            'Delete offer {{ offer.code }}?')">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-tag"></i>
+                </div>
+                <h3>No offers yet</h3>
+                <p style="color:var(--text-muted);">
+                    Create promo codes to give customers
+                    discounts and drive more orders.
+                </p>
+                <a href="{% url 'offer_add' %}"
+                   class="btn btn-accent px-5 mt-3">
+                    Create First Offer
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

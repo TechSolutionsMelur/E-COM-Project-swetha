@@ -1,0 +1,303 @@
+
+/* ── Saved Address Cards ── */
+.saved-addresses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+.saved-addr-card {
+    display: block;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+.saved-addr-card input { display: none; }
+.saved-addr-card:hover {
+    border-color: rgba(255,107,53,0.3);
+}
+.saved-addr-card.selected {
+    border-color: var(--accent);
+    background: rgba(255,107,53,0.07);
+    box-shadow: 0 0 0 2px rgba(255,107,53,0.15);
+}
+.addr-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.addr-label-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 20px;
+    padding: 2px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.default-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 20px;
+    padding: 1px 8px;
+}
+.addr-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 3px;
+}
+.addr-text {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0 0 3px;
+}
+.addr-phone {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ── Payment method cards ── */
+.payment-methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+.payment-method-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+.payment-method-card input { display: none; }
+.payment-method-card:hover {
+    border-color: rgba(255,107,53,0.3);
+}
+.payment-method-card.active {
+    border-color: var(--accent);
+    background: rgba(255,107,53,0.07);
+}
+.pm-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.pm-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.pm-desc {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+.pm-check {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: var(--transition);
+}
+.payment-method-card.active .pm-check { opacity: 1; }
+
+/* ── Order Success ── */
+.success-animation {
+    display: flex;
+    justify-content: center;
+}
+.success-circle {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.15);
+    border: 2px solid #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #10b981;
+    animation: successPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes successPop {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+.order-number-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,107,53,0.08);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: var(--radius-md);
+    padding: 10px 24px;
+    margin: 16px 0;
+}
+.order-num {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-family: monospace;
+}
+
+/* ── Order History Cards ── */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.order-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+.order-card:hover {
+    border-color: rgba(255,107,53,0.25);
+    transform: translateY(-2px);
+}
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.order-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.order-number {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+.order-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+.order-card-body {
+    padding: 14px 20px;
+}
+.order-restaurant {
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.order-items-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.order-item-chip {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2px 10px;
+}
+.order-item-chip.more {
+    color: var(--accent);
+    border-color: rgba(255,107,53,0.2);
+}
+.order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.02);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.order-total {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+/* ── Order Status Badges ── */
+.order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    padding: 3px 12px;
+}
+.status-pending {
+    background: rgba(245,158,11,0.12);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.25);
+}
+.status-confirmed,
+.status-preparing {
+    background: rgba(59,130,246,0.12);
+    color: #60a5fa;
+    border: 1px solid rgba(59,130,246,0.25);
+}
+.status-out {
+    background: rgba(255,107,53,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(255,107,53,0.25);
+}
+.status-delivered {
+    background: rgba(16,185,129,0.12);
+    color: #10b981;
+    border: 1px solid rgba(16,185,129,0.25);
+}
+.status-cancelled {
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.25);
+}
+
+/* ── Summary rows (reused) ── */
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.summary-row:last-child { border-bottom: none; }
+.total-row {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}

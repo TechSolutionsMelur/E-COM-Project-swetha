@@ -1,0 +1,90 @@
+{% load static %}
+<aside class="dash-sidebar">
+
+    <!-- Restaurant Info -->
+    <div class="sidebar-brand">
+        <div class="sidebar-avatar">
+            {% if profile.cover_image %}
+                <img src="{{ profile.cover_image.url }}"
+                     alt="{{ profile.restaurant_name }}">
+            {% else %}
+                <i class="bi bi-shop"></i>
+            {% endif %}
+        </div>
+        <div class="sidebar-info">
+            <span class="sidebar-name">
+                {{ profile.restaurant_name|truncatechars:20 }}
+            </span>
+            <span class="sidebar-role">Restaurant Owner</span>
+        </div>
+    </div>
+
+    <!-- Open / Closed toggle -->
+    <div class="sidebar-status-toggle">
+        <span class="status-label">
+            Status:
+            <strong class="{% if profile.is_open %}text-success{% else %}text-danger{% endif %}">
+                {% if profile.is_open %}🟢 Open{% else %}🔴 Closed{% endif %}
+            </strong>
+        </span>
+        <a href="{% url 'toggle_restaurant_status' %}"
+           class="btn-status-toggle {% if profile.is_open %}open{% else %}closed{% endif %}">
+            {% if profile.is_open %}Close Now{% else %}Open Now{% endif %}
+        </a>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <a href="{% url 'restaurant_dashboard' %}"
+           class="sidebar-link {% if active_tab == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-grid-1x2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'menu_list' %}"
+           class="sidebar-link {% if active_tab == 'menu' %}active{% endif %}">
+            <i class="bi bi-journal-text"></i>
+            <span>Menu Management</span>
+        </a>
+        <a href="{% url 'offer_list' %}"
+        class="sidebar-link
+        {% if active_tab == 'offers' %}active{% endif %}">
+            <i class="bi bi-tag-fill"></i>
+            <span>Offers & Discounts</span>
+        </a>
+        <a href="{% url 'restaurant_orders' %}"
+        class="sidebar-link {% if active_tab == 'orders' %}active{% endif %}">
+            <i class="bi bi-receipt"></i>
+            <span>Orders</span>
+            {% if pending_count %}
+            <span class="sidebar-badge">{{ pending_count }}</span>
+            {% endif %}
+        </a>
+        <a href="{% url 'restaurant_profile_edit' %}"
+           class="sidebar-link {% if active_tab == 'profile' %}active{% endif %}">
+            <i class="bi bi-person-gear"></i>
+            <span>Profile & Settings</span>
+        </a>
+        <a href="{% url 'restaurant_analytics' %}"
+        class="sidebar-link
+        {% if active_tab == 'analytics' %}active{% endif %}">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+    </nav>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-footer">
+        <a href="{% url 'landing' %}" class="sidebar-link">
+            <i class="bi bi-house-door"></i>
+            <span>View Storefront</span>
+        </a>
+        <a href="{% url 'logout' %}" class="sidebar-link text-danger-link">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+</aside>

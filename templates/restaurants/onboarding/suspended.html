@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Account Suspended{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-md-7">
+<div class="glass-card p-5 text-center">
+
+    <div class="pending-icon mb-4"
+         style="background:rgba(107,114,128,0.15);
+                border-color:rgba(107,114,128,0.4);
+                color:#9ca3af;">
+        <i class="bi bi-slash-circle-fill"></i>
+    </div>
+
+    <h2 class="auth-heading">Account Suspended</h2>
+    <p style="color:var(--text-muted);" class="mt-2 mb-4">
+        Your restaurant
+        <span class="text-accent fw-600">{{ profile.restaurant_name }}</span>
+        has been temporarily suspended.
+        Please contact our support team to resolve this.
+    </p>
+
+    <div class="glass-card p-4 text-start mb-4"
+         style="border-color:rgba(107,114,128,0.3);">
+        <h6 style="color:#9ca3af;" class="mb-2">
+            <i class="bi bi-headset me-2"></i>Contact Support
+        </h6>
+        <p style="color:var(--text-muted); margin:0; font-size:0.9rem;">
+            Email us at
+            <a href="mailto:support@fooddash.com"
+               class="text-accent text-decoration-none">
+               support@fooddash.com
+            </a>
+            with your registered email and restaurant name.
+            Our team will respond within 24 hours.
+        </p>
+    </div>
+
+    <a href="{% url 'logout' %}" class="btn btn-glass-danger px-5">
+        <i class="bi bi-box-arrow-right me-2"></i> Logout
+    </a>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Your Cart — FoodRush{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    <div class="d-flex align-items-center gap-3 mb-5">
+        <a href="javascript:history.back()"
+           class="btn btn-glass btn-sm px-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h3 class="fw-700 mb-0">Your Cart</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">
+                {% if cart.restaurant %}
+                    Ordering from
+                    <strong class="text-accent">
+                        {{ cart.restaurant.restaurant_name }}
+                    </strong>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if not cart.is_empty %}
+    <div class="row g-4">
+
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="glass-card">
+                <div class="dash-card-header">
+                    <h6>
+                        <i class="bi bi-bag-fill text-accent me-2"></i>
+                        {{ cart.total_items }}
+                        item{{ cart.total_items|pluralize }} in cart
+                    </h6>
+                    <form method="POST" action="{% url 'clear_cart' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn-dash-danger"
+                                onclick="return confirm(
+                                    'Clear your entire cart?')">
+                            <i class="bi bi-trash3 me-1"></i>
+                            Clear Cart
+                        </button>
+                    </form>
+                </div>
+
+                <div class="cart-full-list">
+                    {% for ci in cart_items %}
+                    <div class="cart-full-row"
+                         id="fullCartRow{{ ci.menu_item.pk }}">
+
+                        <!-- Image -->
+                        <div class="cart-full-img">
+                            {% if ci.menu_item.image %}
+                            <img src="{{ ci.menu_item.image.url }}"
+                                 alt="{{ ci.menu_item.name }}">
+                            {% else %}
+                            <div class="cart-img-placeholder">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Info -->
+                        <div class="cart-full-info">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="veg-dot
+                                    {% if ci.menu_item.item_type == 'veg' %}veg
+                                    {% else %}nonveg{% endif %}">
+                                </span>
+                                <h6 class="fw-600 mb-0">
+                                    {{ ci.menu_item.name }}
+                                </h6>
+                            </div>
+                            {% if ci.menu_item.description %}
+                            <p class="mcard-desc mt-1">
+                                {{ ci.menu_item.description|truncatechars:60 }}
+                            </p>
+                            {% endif %}
+                            <span class="text-accent fw-600">
+                                ₹{{ ci.menu_item.price }} each
+                            </span>
+                        </div>
+
+                        <!-- Qty + Total -->
+                        <div class="cart-full-right">
+                            <div class="qty-controls">
+                                <button class="qty-btn minus"
+                                        onclick="removeItem(
+                                            {{ ci.menu_item.pk }},
+                                            true)">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <span class="qty-value"
+                                      id="qty{{ ci.menu_item.pk }}">
+                                    {{ ci.quantity }}
+                                </span>
+                                <button class="qty-btn plus"
+                                        onclick="addItem(
+                                            {{ ci.menu_item.pk }},
+                                            true)">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <span class="cart-full-total"
+                                  id="itemTotal{{ ci.menu_item.pk }}">
+                                ₹{{ ci.item_total }}
+                            </span>
+                            <button class="cart-item-remove"
+                                    onclick="deleteItem(
+                                        {{ ci.menu_item.pk }},
+                                        true)">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="glass-card">
+                <div class="dash-card-header">
+                    <h6>
+                        <i class="bi bi-receipt text-accent me-2"></i>
+                        Order Summary
+                    </h6>
+                </div>
+                <div class="dash-card-body">
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summarySubtotal">
+                            ₹{{ cart.subtotal }}
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery Fee</span>
+                        <span>₹{{ delivery_fee }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>GST (5%)</span>
+                        <span>₹{{ taxes }}</span>
+                    </div>
+
+                    {% if cart.restaurant.min_order_amount > cart.subtotal %}
+                    <div class="min-order-warn">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Min order is
+                        ₹{{ cart.restaurant.min_order_amount }}.
+                        Add
+                        ₹{{ cart.restaurant.min_order_amount|add:"-0"|floatformat:0 }}
+                        more.
+                    </div>
+                    {% endif %}
+
+                    <hr class="glass-divider">
+
+                    <!-- Update total row in cart.html: -->
+                    <div class="summary-row total-row">
+                        <span>Total</span>
+                        <span class="text-accent fw-700" id="cartFinalTotal">
+                            ₹{{ total|floatformat:2 }}
+                        </span>
+                    </div>
+                    <!-- Coupon section — add inside Order Summary card -->
+                    <hr class="glass-divider my-3">
+
+                    <!-- Applied offer display -->
+                    <div id="offerApplied"
+                        style="display:{% if cart.applied_offer %}flex{% else %}none{% endif %};"
+                        class="offer-applied-row">
+                        <div>
+                            <span class="offer-code-badge">
+                                <i class="bi bi-tag-fill me-1"></i>
+                                <span id="offerCodeText">
+                                    {% if cart.applied_offer %}
+                                    {{ cart.applied_offer.code }}
+                                    {% endif %}
+                                </span>
+                            </span>
+                            <small style="color:#10b981; margin-left:6px;">
+                                — ₹<span id="offerSavingText">
+                                    {{ cart.discount_amount }}
+                                </span> saved
+                            </small>
+                        </div>
+                        <button onclick="removeCoupon()"
+                                class="btn-clear-file"
+                                title="Remove offer">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Coupon input -->
+                    <div id="couponInputRow"
+                        style="{% if cart.applied_offer %}display:none;{% endif %}">
+                        <div class="coupon-input-row">
+                            <input type="text"
+                                id="couponCode"
+                                class="form-control glass-input"
+                                placeholder="Enter promo code"
+                                style="text-transform:uppercase;">
+                            <button class="btn btn-glass px-3"
+                                    onclick="applyCoupon()">
+                                Apply
+                            </button>
+                        </div>
+                        <p id="couponMsg"
+                        style="font-size:0.78rem; margin-top:6px; display:none;">
+                        </p>
+                    </div>
+
+                    <!-- Discount row -->
+                    <div class="summary-row"
+                        id="discountRow"
+                        style="{% if not cart.applied_offer %}display:none;{% endif %}
+                                color:#10b981;">
+                        <span>Discount</span>
+                        <span>— ₹<span id="summaryDiscount">
+                            {{ cart.discount_amount }}
+                        </span></span>
+                    </div>
+
+                    <a href="{% url 'checkout' %}" class="btn btn-accent w-100 py-2 mt-4">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        Proceed to Checkout
+                    </a>
+
+                    <p class="text-center mt-3"
+                       style="color:var(--text-muted); font-size:0.78rem;">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Secure checkout · No hidden charges
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="empty-state" style="padding:100px 0;">
+        <div class="empty-icon">
+            <i class="bi bi-bag-x"></i>
+        </div>
+        <h3>Your cart is empty</h3>
+        <p style="color:var(--text-muted);">
+            Add some delicious items from a restaurant to get started.
+        </p>
+        <a href="{% url 'landing' %}"
+           class="btn btn-accent px-5 mt-3">
+            <i class="bi bi-search me-2"></i>
+            Browse Restaurants
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/customer.js' %}"></script>
+{% endblock %}

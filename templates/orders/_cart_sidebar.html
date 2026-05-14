@@ -1,0 +1,53 @@
+{% load static %}
+<div id="cartItemsList">
+    {% for ci in cart.items.select_related %}
+    <div class="cart-item-row" id="cartRow{{ ci.menu_item.pk }}">
+        <div class="cart-item-info">
+            <span class="veg-dot
+                {% if ci.menu_item.item_type == 'veg' %}veg
+                {% else %}nonveg{% endif %}"
+                  style="flex-shrink:0;">
+            </span>
+            <span class="cart-item-name">
+                {{ ci.menu_item.name }}
+            </span>
+        </div>
+        <div class="cart-item-right">
+            <div class="qty-controls">
+                <button class="qty-btn minus"
+                        onclick="removeItem({{ ci.menu_item.pk }})">
+                    <i class="bi bi-dash"></i>
+                </button>
+                <span class="qty-value"
+                      id="qty{{ ci.menu_item.pk }}">
+                    {{ ci.quantity }}
+                </span>
+                <button class="qty-btn plus"
+                        onclick="addItem({{ ci.menu_item.pk }})">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+            <span class="cart-item-price"
+                  id="itemTotal{{ ci.menu_item.pk }}">
+                ₹{{ ci.item_total }}
+            </span>
+            <button class="cart-item-remove"
+                    onclick="deleteItem({{ ci.menu_item.pk }})">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Subtotal -->
+<div class="cart-subtotal-row">
+    <span>Subtotal</span>
+    <span id="cartSubtotal">₹{{ cart.subtotal }}</span>
+</div>
+
+<a href="{% url 'cart_detail' %}"
+   class="btn btn-accent w-100 mt-3 py-2">
+    Proceed to Cart
+    <i class="bi bi-arrow-right ms-2"></i>
+</a>

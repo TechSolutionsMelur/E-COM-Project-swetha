@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ action }} Offer{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+        <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h6>
+                        <i class="bi bi-tag-fill
+                                   text-accent me-2"></i>
+                        {{ action }} Offer
+                    </h6>
+                    <a href="{% url 'offer_list' %}"
+                       class="btn-dash-action">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back
+                    </a>
+                </div>
+
+                <div class="dash-card-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+
+                        <div class="col-md-8">
+                            <label class="glass-label">
+                                Offer Title *
+                            </label>
+                            <input type="text" name="title"
+                                   value="{{ form.title.value|default:'' }}"
+                                   class="form-control glass-input
+                                   {% if form.title.errors %}
+                                   is-invalid{% endif %}"
+                                   placeholder="e.g. Weekend Special">
+                            {% for e in form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ e }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="glass-label">
+                                Promo Code *
+                            </label>
+                            <input type="text" name="code"
+                                   value="{{ form.code.value|default:'' }}"
+                                   class="form-control glass-input
+                                   {% if form.code.errors %}
+                                   is-invalid{% endif %}"
+                                   placeholder="e.g. SAVE20"
+                                   style="text-transform:uppercase;
+                                          font-weight:700;
+                                          letter-spacing:1px;">
+                            {% for e in form.code.errors %}
+                                <div class="invalid-feedback">
+                                    {{ e }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="glass-label">
+                                Description
+                            </label>
+                            <textarea name="description" rows="2"
+                                      class="form-control glass-input"
+                                      placeholder="Short offer description for customers">{{ form.description.value|default:'' }}</textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">
+                                Discount Type *
+                            </label>
+                            <select name="discount_type"
+                                    class="form-control glass-input
+                                           glass-select"
+                                    id="discountType"
+                                    onchange="toggleDiscountFields()">
+                                {% for val, label in form.fields.discount_type.choices %}
+                                <option value="{{ val }}"
+                                    {% if form.discount_type.value == val %}
+                                    selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Discount value (hidden for delivery/bogo) -->
+                        <div class="col-md-3" id="discountValueField">
+                            <label class="glass-label"
+                                   id="discountValueLabel">
+                                Discount Value *
+                            </label>
+                            <input type="number" name="discount_value"
+                                   value="{{ form.discount_value.value|default:'0' }}"
+                                   class="form-control glass-input
+                                   {% if form.discount_value.errors %}
+                                   is-invalid{% endif %}"
+                                   min="0" step="0.01"
+                                   placeholder="0">
+                            {% for e in form.discount_value.errors %}
+                                <div class="invalid-feedback">
+                                    {{ e }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-3" id="maxDiscountField">
+                            <label class="glass-label">
+                                Max Discount (₹)
+                            </label>
+                            <input type="number" name="max_discount"
+                                   value="{{ form.max_discount.value|default:'' }}"
+                                   class="form-control glass-input"
+                                   min="0" step="0.01"
+                                   placeholder="No cap">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">
+                                Min Order Amount (₹)
+                            </label>
+                            <input type="number" name="min_order_value"
+                                   value="{{ form.min_order_value.value|default:'0' }}"
+                                   class="form-control glass-input"
+                                   min="0" step="0.01"
+                                   placeholder="0">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">
+                                Usage Limit
+                            </label>
+                            <input type="number" name="usage_limit"
+                                   value="{{ form.usage_limit.value|default:'0' }}"
+                                   class="form-control glass-input"
+                                   min="0"
+                                   placeholder="0 = unlimited">
+                            <small style="color:var(--text-muted);
+                                          font-size:0.78rem;">
+                                0 means unlimited uses
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">
+                                Valid From
+                            </label>
+                            <input type="datetime-local"
+                                   name="valid_from"
+                                   value="{{ form.valid_from.value|default:'' }}"
+                                   class="form-control glass-input">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="glass-label">
+                                Valid Until
+                            </label>
+                            <input type="datetime-local"
+                                   name="valid_until"
+                                   value="{{ form.valid_until.value|default:'' }}"
+                                   class="form-control glass-input">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="toggle-field">
+                                <div>
+                                    <span class="glass-label d-block">
+                                        Active
+                                    </span>
+                                    <small style="color:var(--text-muted);">
+                                        Customers can use this offer
+                                    </small>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox"
+                                           name="is_active"
+                                           {% if form.is_active.value %}
+                                           checked{% endif %}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Non-field errors -->
+                        {% if form.non_field_errors %}
+                        <div class="col-12">
+                            <div class="alert glass-alert"
+                                 style="border-color:rgba(220,53,69,0.4);">
+                                {% for e in form.non_field_errors %}
+                                <small>
+                                    <i class="bi bi-exclamation-circle
+                                               me-1"></i>
+                                    {{ e }}
+                                </small>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'offer_list' %}"
+                           class="btn btn-glass px-4">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="btn btn-accent px-5">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ action }} Offer
+                        </button>
+                    </div>
+
+                </form>
+                </div>
+            </div>
+
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+function toggleDiscountFields() {
+    const type    = document.getElementById('discountType').value;
+    const valField= document.getElementById('discountValueField');
+    const maxField= document.getElementById('maxDiscountField');
+    const label   = document.getElementById('discountValueLabel');
+
+    if (type === 'delivery' || type === 'bogo') {
+        valField.style.display = 'none';
+        maxField.style.display = 'none';
+    } else {
+        valField.style.display = '';
+        maxField.style.display = type === 'percent' ? '' : 'none';
+        label.textContent = type === 'percent'
+            ? 'Percentage (%) *'
+            : 'Flat Amount (₹) *';
+    }
+}
+
+// Init on load
+toggleDiscountFields();
+
+// Auto uppercase promo code
+const codeInput = document.querySelector('[name="code"]');
+if (codeInput) {
+    codeInput.addEventListener('input', () => {
+        codeInput.value = codeInput.value.toUpperCase();
+    });
+}
+</script>
+{% endblock %}

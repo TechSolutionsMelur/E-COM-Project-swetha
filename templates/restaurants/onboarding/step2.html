@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Step 2 — Restaurant Address{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    {% include 'restaurants/onboarding/_progress.html' with step=2 %}
+
+    <div class="row justify-content-center">
+    <div class="col-lg-8">
+    <div class="glass-card p-5">
+
+        <h3 class="fw-700 mb-1">Restaurant Address</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem;" class="mb-4">
+            Enter the exact location of your restaurant.
+            This will be used for delivery radius and customer discovery.
+        </p>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+
+                <div class="col-12">
+                    <label class="glass-label">Address Line 1 *</label>
+                    <input type="text" name="address_line1"
+                           value="{{ form.address_line1.value|default:'' }}"
+                           class="form-control glass-input {% if form.address_line1.errors %}is-invalid{% endif %}"
+                           placeholder="Shop / Building number, Street name">
+                    {% for e in form.address_line1.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-12">
+                    <label class="glass-label">Address Line 2</label>
+                    <input type="text" name="address_line2"
+                           value="{{ form.address_line2.value|default:'' }}"
+                           class="form-control glass-input"
+                           placeholder="Area, Colony, Locality (optional)">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">City *</label>
+                    <input type="text" name="city"
+                           value="{{ form.city.value|default:'' }}"
+                           class="form-control glass-input {% if form.city.errors %}is-invalid{% endif %}"
+                           placeholder="e.g. Coimbatore">
+                    {% for e in form.city.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">State *</label>
+                    <input type="text" name="state"
+                           value="{{ form.state.value|default:'' }}"
+                           class="form-control glass-input {% if form.state.errors %}is-invalid{% endif %}"
+                           placeholder="e.g. Tamil Nadu">
+                    {% for e in form.state.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">PIN Code *</label>
+                    <input type="text" name="pincode"
+                           value="{{ form.pincode.value|default:'' }}"
+                           class="form-control glass-input {% if form.pincode.errors %}is-invalid{% endif %}"
+                           placeholder="6-digit PIN code"
+                           maxlength="6">
+                    {% for e in form.pincode.errors %}
+                        <div class="invalid-feedback">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="glass-label">Landmark</label>
+                    <input type="text" name="landmark"
+                           value="{{ form.landmark.value|default:'' }}"
+                           class="form-control glass-input"
+                           placeholder="e.g. Near Bus Stand (optional)">
+                </div>
+
+                <!-- Address Preview Card -->
+                <div class="col-12 mt-2">
+                    <div class="glass-card p-3"
+                         style="border-color: rgba(255,107,53,0.2);">
+                        <small style="color:var(--text-muted);">
+                            <i class="bi bi-geo-alt-fill text-accent me-1"></i>
+                            <strong>Address Preview:</strong>
+                            <span id="address-preview" style="margin-left:6px;">
+                                Fill in the fields above to see a preview.
+                            </span>
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'onboarding_step1' %}" class="btn btn-glass px-4">
+                    <i class="bi bi-arrow-left me-2"></i> Back
+                </a>
+                <button type="submit" class="btn btn-accent px-5 py-2">
+                    Save & Continue <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+
+        </form>
+    </div>
+    </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Live address preview
+    const fields = ['address_line1','address_line2','city','state','pincode'];
+    const preview = document.getElementById('address-preview');
+
+    function updatePreview() {
+        const parts = fields
+            .map(f => document.querySelector(`[name="${f}"]`)?.value?.trim())
+            .filter(Boolean);
+        preview.textContent = parts.length ? parts.join(', ') : 'Fill in the fields above to see a preview.';
+    }
+
+    fields.forEach(f => {
+        const el = document.querySelector(`[name="${f}"]`);
+        if (el) el.addEventListener('input', updatePreview);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Payment — Checkout{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/customer.css' %}">
+<link rel="stylesheet" href="{% static 'style/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    {% include 'orders/checkout/_checkout_steps.html' with step=2 %}
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <!-- Delivery Address Summary -->
+            <div class="glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between
+                            align-items-start">
+                    <div>
+                        <h6 class="fw-700 mb-2">
+                            <i class="bi bi-geo-alt-fill
+                                       text-accent me-2"></i>
+                            Delivering To
+                        </h6>
+                        <p class="mb-0 fw-600">
+                            {{ address.full_name }}
+                        </p>
+                        <p style="color:var(--text-muted);
+                                   font-size:0.85rem; margin:4px 0 0;">
+                            {{ address.full_address }}
+                        </p>
+                        <p style="color:var(--text-muted);
+                                   font-size:0.82rem; margin:4px 0 0;">
+                            <i class="bi bi-telephone me-1"></i>
+                            {{ address.phone }}
+                        </p>
+                    </div>
+                    <a href="{% url 'checkout' %}"
+                       class="btn-dash-action">
+                        <i class="bi bi-pencil me-1"></i> Change
+                    </a>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="glass-card p-4 mb-4">
+                <h6 class="fw-700 mb-3">
+                    <i class="bi bi-credit-card-fill
+                               text-accent me-2"></i>
+                    Payment Method
+                </h6>
+
+                <form method="POST" novalidate id="paymentForm">
+                    {% csrf_token %}
+
+                    <div class="payment-methods-grid">
+
+                        <label class="payment-method-card active"
+                               id="pm-cod">
+                            <input type="radio" name="payment_method"
+                                   value="cod" checked
+                                   onchange="selectPayment('cod')">
+                            <div class="pm-icon" style="color:#10b981;">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+                            <div>
+                                <span class="pm-name">
+                                    Cash on Delivery
+                                </span>
+                                <span class="pm-desc">
+                                    Pay when order arrives
+                                </span>
+                            </div>
+                            <div class="pm-check">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </label>
+
+                        <label class="payment-method-card"
+                               id="pm-upi">
+                            <input type="radio" name="payment_method"
+                                   value="upi"
+                                   onchange="selectPayment('upi')">
+                            <div class="pm-icon" style="color:#7c3aed;">
+                                <i class="bi bi-phone-fill"></i>
+                            </div>
+                            <div>
+                                <span class="pm-name">UPI</span>
+                                <span class="pm-desc">
+                                    GPay, PhonePe, Paytm
+                                </span>
+                            </div>
+                            <div class="pm-check">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </label>
+
+                        <label class="payment-method-card"
+                               id="pm-card">
+                            <input type="radio" name="payment_method"
+                                   value="card"
+                                   onchange="selectPayment('card')">
+                            <div class="pm-icon" style="color:#3b82f6;">
+                                <i class="bi bi-credit-card-2-front"></i>
+                            </div>
+                            <div>
+                                <span class="pm-name">
+                                    Credit / Debit Card
+                                </span>
+                                <span class="pm-desc">
+                                    Visa, Mastercard, RuPay
+                                </span>
+                            </div>
+                            <div class="pm-check">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </label>
+
+                        <label class="payment-method-card"
+                               id="pm-wallet">
+                            <input type="radio" name="payment_method"
+                                   value="wallet"
+                                   onchange="selectPayment('wallet')">
+                            <div class="pm-icon" style="color:#f59e0b;">
+                                <i class="bi bi-wallet2"></i>
+                            </div>
+                            <div>
+                                <span class="pm-name">Wallet</span>
+                                <span class="pm-desc">
+                                    FoodDash wallet balance
+                                </span>
+                            </div>
+                            <div class="pm-check">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </label>
+
+                    </div>
+
+                    <!-- Special Instructions -->
+                    <div class="mt-4">
+                        <label class="glass-label">
+                            Special Instructions
+                            <span class="badge-optional">Optional</span>
+                        </label>
+                        <textarea name="special_instructions"
+                                  rows="2"
+                                  class="form-control glass-input"
+                                  placeholder="e.g. Extra spicy, no onions, ring doorbell...">{{ form.special_instructions.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'checkout' %}"
+                           class="btn btn-glass px-4">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Back
+                        </a>
+                        <button type="submit"
+                                class="btn btn-accent px-5 py-2"
+                                id="placeOrderBtn">
+                            <i class="bi bi-bag-check-fill me-2"></i>
+                            Place Order · ₹{{ total|floatformat:2 }}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 sticky-top"
+                 style="top: 90px;">
+                <h6 class="fw-700 mb-3">
+                    <i class="bi bi-receipt text-accent me-2"></i>
+                    Final Bill
+                </h6>
+
+                {% for ci in cart.items.all %}
+                <div class="d-flex justify-content-between mb-2"
+                     style="font-size:0.82rem;">
+                    <span style="color:var(--text-muted);">
+                        {{ ci.menu_item.name }}
+                        <span style="color:var(--text-primary);">
+                            × {{ ci.quantity }}
+                        </span>
+                    </span>
+                    <span>₹{{ ci.item_total }}</span>
+                </div>
+                {% endfor %}
+
+                <hr style="border-color:var(--glass-border); margin:12px 0;">
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ cart.subtotal }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee</span>
+                    <span>₹{{ delivery_fee }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>GST (5%)</span>
+                    <span>₹{{ taxes }}</span>
+                </div>
+
+                <hr style="border-color:var(--glass-border); margin:12px 0;">
+
+                <div class="summary-row total-row">
+                    <span>Total</span>
+                    <span class="text-accent fw-700">
+                        ₹{{ total|floatformat:2 }}
+                    </span>
+                </div>
+
+                <div class="mt-3 p-3 glass-card"
+                     style="border-color:rgba(16,185,129,0.2);
+                            background:rgba(16,185,129,0.05);">
+                    <small style="color:#10b981; font-size:0.78rem;">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Safe & secure checkout.
+                        No hidden charges.
+                    </small>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectPayment(method) {
+    document.querySelectorAll('.payment-method-card')
+        .forEach(c => c.classList.remove('active'));
+    document.getElementById(`pm-${method}`)
+        ?.classList.add('active');
+}
+
+// Place order button loading state
+document.getElementById('paymentForm')
+    ?.addEventListener('submit', () => {
+    const btn  = document.getElementById('placeOrderBtn');
+    btn.disabled      = true;
+    btn.innerHTML     =
+        '<i class="bi bi-arrow-repeat me-2 spin-icon"></i>Placing Order...';
+});
+</script>
+{% endblock %}

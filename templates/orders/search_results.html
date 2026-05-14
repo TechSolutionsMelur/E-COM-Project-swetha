@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Search: {{ query }} — FoodDash{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/customer.css' %}">
+<link rel="stylesheet" href="{% static 'style/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 100px 0 60px;">
+<div class="container">
+
+    <!-- Search Bar -->
+    <form method="GET" action="{% url 'customer_search' %}"
+          class="mb-5">
+        <div class="cust-search-box"
+             style="max-width:600px; margin:0 auto;">
+            <i class="bi bi-search cust-search-icon"></i>
+            <input type="text"
+                   name="q"
+                   value="{{ query }}"
+                   class="cust-search-input"
+                   placeholder="Search dishes or restaurants..."
+                   autofocus>
+            <button type="submit" class="cust-search-btn">
+                Search
+            </button>
+        </div>
+    </form>
+
+    {% if query %}
+
+    <!-- Result counts -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <h5 class="fw-700 mb-0">
+            Results for
+            <span class="text-accent">"{{ query }}"</span>
+        </h5>
+        <span style="color:var(--text-muted); font-size:0.85rem;">
+            {{ rest_count }} restaurant{{ rest_count|pluralize }},
+            {{ dish_count }} dish{{ dish_count|pluralize }}
+        </span>
+    </div>
+
+    <!-- ── Dishes Section ── -->
+    {% if dishes %}
+    <div class="mb-5">
+        <div class="cust-section-header mb-3">
+            <div>
+                <h5 class="cust-section-title">
+                    <i class="bi bi-egg-fried text-accent me-2"></i>
+                    Dishes
+                </h5>
+                <p class="cust-section-sub">
+                    {{ dish_count }} matching dish{{ dish_count|pluralize }}
+                </p>
+            </div>
+        </div>
+
+        <div class="dish-results-grid">
+            {% for item in dishes %}
+            <a href="{% url 'restaurant_detail' item.restaurant.pk %}"
+               class="dish-result-card text-decoration-none">
+                <div class="dish-result-img">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}"
+                         alt="{{ item.name }}">
+                    {% else %}
+                    <div class="dish-img-placeholder">
+                        <i class="bi bi-egg-fried"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="dish-result-info">
+                    <div class="d-flex align-items-center
+                                gap-2 mb-1">
+                        <span class="veg-dot
+                            {% if item.item_type == 'veg' %}veg
+                            {% else %}nonveg{% endif %}">
+                        </span>
+                        <span class="dish-result-name">
+                            {{ item.name }}
+                        </span>
+                    </div>
+                    <p class="dish-result-restaurant">
+                        <i class="bi bi-shop me-1"
+                           style="color:var(--accent);"></i>
+                        {{ item.restaurant.restaurant_name }}
+                        · {{ item.restaurant.city }}
+                    </p>
+                    <span class="dish-result-price">
+                        ₹{{ item.price }}
+                    </span>
+                </div>
+                <div class="ms-auto flex-shrink-0">
+                    <span class="btn-add-item">
+                        <i class="bi bi-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Restaurants Section ── -->
+    {% if restaurants %}
+    <div class="cust-section-header mb-3">
+        <div>
+            <h5 class="cust-section-title">
+                <i class="bi bi-shop text-accent me-2"></i>
+                Restaurants
+            </h5>
+            <p class="cust-section-sub">
+                {{ rest_count }}
+                matching restaurant{{ rest_count|pluralize }}
+            </p>
+        </div>
+    </div>
+
+    <div class="restaurant-grid">
+        {% for restaurant in restaurants %}
+        <div class="restaurant-card">
+            <div class="card-cover">
+                {% if restaurant.cover_image %}
+                <img src="{{ restaurant.cover_image.url }}"
+                     alt="{{ restaurant.restaurant_name }}"
+                     class="cover-img">
+                {% else %}
+                <div class="cover-placeholder">
+                    <i class="bi bi-shop"></i>
+                </div>
+                {% endif %}
+                <span class="cuisine-badge">
+                    {{ restaurant.get_cuisine_type_display }}
+                </span>
+                <span class="delivery-pill">
+                    <i class="bi bi-clock"></i>
+                    {{ restaurant.avg_delivery_time }} min
+                </span>
+                {% if restaurant.has_active_offer %}
+                <span class="offer-pill-card">
+                    <i class="bi bi-tag-fill"></i> Offer
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body-custom">
+                <div class="card-top-row">
+                    <h3 class="card-restaurant-name">
+                        {{ restaurant.restaurant_name }}
+                    </h3>
+                    <span class="verified-badge">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </span>
+                </div>
+                <p class="card-location">
+                    <i class="bi bi-geo-alt"></i>
+                    {{ restaurant.city }}, {{ restaurant.state }}
+                </p>
+                <div class="card-footer-custom">
+                    <div class="card-meta">
+                        <span class="meta-pill">
+                            <i class="bi bi-bag"></i>
+                            Min ₹{{ restaurant.min_order_amount|floatformat:0 }}
+                        </span>
+                    </div>
+                    <a href="{% url 'restaurant_detail' restaurant.pk %}"
+                       class="btn-order-now">
+                        Order Now
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+
+    <!-- Nothing found -->
+    {% if not dishes and not restaurants %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="bi bi-search"></i>
+        </div>
+        <h3>No results found</h3>
+        <p>Nothing matched "{{ query }}". Try different keywords.</p>
+        <a href="{% url 'landing' %}"
+           class="btn btn-accent px-5 mt-3">
+            Browse All Restaurants
+        </a>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="bi bi-search"></i>
+        </div>
+        <h3>Search FoodDash</h3>
+        <p>Type a dish name, restaurant, or cuisine above.</p>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Confirm Delete{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'style/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+    {% include 'restaurants/dashboard/_sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        {% include 'restaurants/dashboard/_topbar.html' %}
+
+        <div class="dash-content">
+        <div class="row justify-content-center">
+        <div class="col-md-6">
+        <div class="dash-card text-center p-5">
+
+            <div class="pending-icon mb-4"
+                 style="background:rgba(220,53,69,0.12);
+                        border-color:rgba(220,53,69,0.3);
+                        color:#ff6b7a; margin:0 auto;">
+                <i class="bi bi-trash3-fill"></i>
+            </div>
+
+            <h4 class="fw-700 mb-2">Confirm Delete</h4>
+
+            {% if item %}
+            <p style="color:var(--text-muted);">
+                Are you sure you want to delete
+                <strong class="text-accent">{{ item.name }}</strong>?
+                This cannot be undone.
+            </p>
+            {% elif category %}
+            <p style="color:var(--text-muted);">
+                Delete category
+                <strong class="text-accent">{{ category.name }}</strong>?
+                Items in this category will become uncategorized.
+            </p>
+            {% endif %}
+
+            <div class="d-flex gap-3 justify-content-center mt-4">
+                <a href="{% url 'menu_list' %}"
+                   class="btn btn-glass px-4">
+                    Cancel
+                </a>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-glass-danger px-4 py-2">
+                        <i class="bi bi-trash3 me-2"></i> Yes, Delete
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — FoodRush{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+
+                <div class="glass-card p-5">
+                    <div class="text-center mb-4">
+                        <div class="auth-icon mb-3">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <h2 class="auth-heading">Welcome Back</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            Sign in to continue to FoodRush
+                        </p>
+                    </div>
+
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label glass-label">Username</label>
+                            {{ form.username }}
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label glass-label">Password</label>
+                            {{ form.password }}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="alert glass-alert mb-3" style="border-color: rgba(220,53,69,0.4);">
+                            {% for error in form.non_field_errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-accent w-100 py-2 mt-1">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                        </button>
+                    </form>
+
+                    <hr class="glass-divider my-4">
+
+                    <p class="text-center" style="color: var(--text-muted); font-size: 0.9rem;">
+                        New to FoodRush?
+                        <a href="{% url 'role_select' %}" class="text-accent text-decoration-none">
+                            Create an account
+                        </a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

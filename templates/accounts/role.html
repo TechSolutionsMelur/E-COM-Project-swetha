@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Join FoodRush{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="auth-heading">Join <span class="text-accent">FoodRush</span></h1>
+            <p style="color: var(--text-muted);">How would you like to use FoodRush?</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- Customer Card -->
+            <div class="col-md-5">
+                <a href="{% url 'register_customer' %}" class="text-decoration-none">
+                    <div class="glass-card role-card text-center p-5">
+                        <div class="role-icon mb-4">
+                            <i class="bi bi-bag-heart-fill"></i>
+                        </div>
+                        <h3 class="fw-700 mb-2">I'm a Customer</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">
+                            Discover restaurants, order food, and track deliveries in real time.
+                        </p>
+                        <div class="mt-4 btn btn-accent px-5 py-2">
+                            Get Started <i class="bi bi-arrow-right ms-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Restaurant Card -->
+            <div class="col-md-5">
+                <a href="{% url 'register_restaurant' %}" class="text-decoration-none">
+                    <div class="glass-card role-card role-card-alt text-center p-5">
+                        <div class="role-icon role-icon-alt mb-4">
+                            <i class="bi bi-shop-window"></i>
+                        </div>
+                        <h3 class="fw-700 mb-2">I'm a Restaurant</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">
+                            List your restaurant, manage your menu, and receive orders online.
+                        </p>
+                        <div class="mt-4 btn btn-glass px-5 py-2">
+                            Partner With Us <i class="bi bi-arrow-right ms-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+        <p class="text-center mt-4" style="color: var(--text-muted);">
+            Already have an account?
+            <a href="{% url 'login' %}" class="text-accent text-decoration-none fw-600">Sign In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
